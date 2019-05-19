@@ -1,0 +1,25 @@
+{
+    "name": "zeloras/geekcms-packages",
+    "description": "Packages list for geek cms",
+    "authors": [
+        {
+            "name": "Zeloras",
+            "email": "zeloras@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Modules\\Packages\\Providers\\PackagesServiceProvider"
+            ],
+            "aliases": {
+                
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Packages\\": ""
+        }
+    }
+}
