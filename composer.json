@@ -1,9 +1,9 @@
 {
-    "name": "zeloras/geekcms-packages",
-    "description": "Packages list for geek cms",
+    "name": "zeloras/packages",
+    "description": "Package system list for geekcms",
     "authors": [
         {
-            "name": "Zeloras",
+            "name": "Vitaly Gerasimov",
             "email": "zeloras@gmail.com"
         }
     ],
