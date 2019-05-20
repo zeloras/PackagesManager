@@ -1,20 +1,16 @@
 <?php
 
-namespace Modules\Packages\Providers;
+namespace GeekCms\PackagesManager\Providers;
 
-use App\Support\ServiceProvider;
+use GeekCms\PackagesManager\Support\ServiceProvider as MainServiceProvider;
 
 /**
- * Class PackagesServiceProvider
- * @package Modules\Packages\Providers
- *
- * Package manager, for install and search new modules
- *
+ * Class PackagesServiceProvider.
  */
-class PackagesServiceProvider extends ServiceProvider
+class PackagesServiceProvider extends MainServiceProvider
 {
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function registerNavigation()
     {
@@ -22,11 +18,11 @@ class PackagesServiceProvider extends ServiceProvider
             $adminSidenav->dropdown(
                 $this->navname,
                 function ($sub) {
-                    $sub->route('admin.packages', trans($this->prefix . $this->name . '::admin/sidenav.installed'), null, [
+                    $sub->route('admin.packages', trans($this->prefix.$this->name.'::admin/sidenav.installed'), null, [
                         'icon' => 'fa fa-fw fa-cogs',
                     ]);
 
-                    $sub->route('admin.packages.list', trans($this->prefix . $this->name . '::admin/sidenav.lists'), null, [
+                    $sub->route('admin.packages.list', trans($this->prefix.$this->name.'::admin/sidenav.lists'), null, [
                         'icon' => 'fa fa-fw fa-shopping-basket',
                     ]);
                 },

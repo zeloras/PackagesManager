@@ -1,16 +1,19 @@
 {
-    "name": "Packages",
-    "alias": "packages",
+    "name": "Packages Manager",
+    "alias": "packagesManager",
     "description": "",
     "keywords": [],
     "active": 1,
     "order": 0,
     "providers": [
-        "Modules\\Packages\\Providers\\PackagesServiceProvider"
+        "GeekCms\\PackagesManager\\Providers\\PackagesServiceProvider",
+        "GeekCms\\PackagesManager\\Providers\\EventServiceProvider"
     ],
     "aliases": {},
     "files": [
         "loader.php"
     ],
-    "requires": []
+    "requires": [
+
+    ]
 }

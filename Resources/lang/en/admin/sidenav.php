@@ -14,5 +14,5 @@ return [
 
     'name' => 'Module manager',
     'installed' => 'Installed',
-    'lists' => 'Lists'
+    'lists' => 'Lists',
 ];

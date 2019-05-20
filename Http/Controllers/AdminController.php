@@ -1,19 +1,16 @@
 <?php
-namespace Modules\Packages\Http\Controllers;
+
+namespace GeekCms\PackagesManager\Http\Controllers;
 
 use Illuminate\Routing\Controller;
 
 /**
- * Class AdminController
- * @package Modules\Packages\Http\Controllers
- *
- * Controller for work with modules
- *
+ * Class AdminController.
  */
 class AdminController extends Controller
 {
     /**
-     * Main route with installed packages
+     * Main route with installed packages.
      *
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
@@ -23,7 +20,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Route for show page with available modules list
+     * Route for show page with available modules list.
      *
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
