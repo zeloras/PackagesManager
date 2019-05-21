@@ -16,13 +16,13 @@ class PackagesServiceProvider extends MainServiceProvider
     {
         if ($adminSidenav = \Menu::instance('admin.sidenav')) {
             $adminSidenav->dropdown(
-                $this->navname,
+                $this->getNavname(),
                 function ($sub) {
-                    $sub->route('admin.packages', trans($this->prefix.$this->name.'::admin/sidenav.installed'), null, [
+                    $sub->route('admin.packages', trans($this->getPrefix() . $this->getName().'::admin/sidenav.installed'), null, [
                         'icon' => 'fa fa-fw fa-cogs',
                     ]);
 
-                    $sub->route('admin.packages.list', trans($this->prefix.$this->name.'::admin/sidenav.lists'), null, [
+                    $sub->route('admin.packages.list', trans($this->getPrefix() . $this->getName().'::admin/sidenav.lists'), null, [
                         'icon' => 'fa fa-fw fa-shopping-basket',
                     ]);
                 },

@@ -14,10 +14,8 @@
         "phpunit/phpunit": "~7.0",
         "mockery/mockery": "~1.0",
         "orchestra/testbench": "^3.6",
-        "friendsofphp/php-cs-fixer": "^2.7",
         "laravel/framework": "5.6.*",
         "spatie/phpunit-snapshot-assertions": "^1.0",
-        "phpstan/phpstan": "^0.9.2",
         "nwidart/laravel-modules": "^3.2"
     },
     "authors": [
@@ -34,7 +32,7 @@
                 "GeekCms\\PackagesManager\\Providers\\EventServiceProvider"
             ],
             "aliases": {
-                "PackageManager": "GeekCms\\PackagesManager\\Facades\\PackageManager"
+                "Packages": "GeekCms\\PackagesManager\\Facades\\Packages"
             }
         }
     },

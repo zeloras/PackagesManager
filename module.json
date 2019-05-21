@@ -1,6 +1,6 @@
 {
-    "name": "Packages Manager",
-    "alias": "packagesManager",
+    "name": "PackagesManager",
+    "alias": "PackagesManager",
     "description": "",
     "keywords": [],
     "active": 1,
@@ -9,7 +9,9 @@
         "GeekCms\\PackagesManager\\Providers\\PackagesServiceProvider",
         "GeekCms\\PackagesManager\\Providers\\EventServiceProvider"
     ],
-    "aliases": {},
+    "aliases": {
+        "Packages": "GeekCms\\PackagesManager\\Facades\\Packages"
+    },
     "files": [
         "loader.php"
     ],

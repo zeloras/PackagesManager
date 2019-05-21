@@ -16,7 +16,7 @@ class AdminController extends Controller
      */
     public function index()
     {
-        return view('packages::admin/index');
+        return view('packagesmanager::admin/index');
     }
 
     /**
@@ -26,6 +26,6 @@ class AdminController extends Controller
      */
     public function list()
     {
-        return view('packages::admin/list');
+        return view('packagesmanager::admin/list');
     }
 }

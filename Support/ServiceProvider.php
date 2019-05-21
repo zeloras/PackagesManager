@@ -2,124 +2,39 @@
 
 namespace GeekCms\PackagesManager\Support;
 
-use Illuminate\Database\Eloquent\Factory;
+use BadMethodCallException;
+use Illuminate\Container\Container;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\ServiceProvider as MainServiceProvider;
+use GeekCms\PackagesManager\Support\Components\ChildServiceProvider;
 
 /**
  * Class ServiceProvider.
  */
-class ServiceProvider extends MainServiceProvider
+class ServiceProvider extends ChildServiceProvider
 {
     /**
-     * This name using for get path to modules from config file.
+     * ServiceProvider constructor.
+     * @param Container $app
+     * @throws \Exception
      */
-    const PATH_MODULES = 'modules';
+    public function __construct(Container $app)
+    {
+        $this->setApp($app);
+        $this->loadCoreComponents();
+        $this->initVariables();
+        $this->registerConfig();
+        $this->registerFiles();
 
-    /**
-     * This name using for get path to root/resources from config file.
-     */
-    const PATH_RESOURCES = 'resources';
-
-    /**
-     * This name using for set log channel.
-     */
-    const LOGS_CHANNEL = 'modules';
-
-    /**
-     * Menu name.
-     *
-     * @var string
-     */
-    protected $navname = '';
-
-    /**
-     * Module name.
-     *
-     * @var string
-     */
-    protected $name = 'module';
-
-    /**
-     * Prefix for configs, settings etc.
-     *
-     * @var string
-     */
-    protected $prefix = 'module_';
-
-    /**
-     * Indicates if loading of the provider is deferred.
-     *
-     * @var bool
-     */
-    protected $defer = false;
-
-    /**
-     * Namespace module name.
-     *
-     * @var string
-     */
-    protected $namespace_name = 'Module';
-
-    /**
-     * Module path from root.
-     *
-     * @var string
-     */
-    protected $module_path = '';
-
-    /**
-     * Config contain base paths for module components.
-     *
-     * @var array
-     */
-    protected static $components_path = [
-        'routes' => 'Http/routes.php',
-        'modules' => 'modules',
-        'main_lang' => 'lang/modules/',
-        'main_view' => 'views/modules/',
-        'module_lang' => 'Resources/lang',
-        'module_view' => 'Resources/views',
-        'module_factories' => 'Database/factories',
-        'module_migrations' => 'Database/Migrations',
-        'module_config' => 'Config/config.php',
-    ];
-
-    /**
-     * Logs instance.
-     *
-     * @var
-     */
-    protected $module_logs;
-
-    /**
-     * Storage instances for work with filesystem in module dir.
-     *
-     * @var Storage
-     */
-    private $module_storage_instance;
-
-    /**
-     * Storage instances for work with filesystem in root/resources dir.
-     *
-     * @var Storage
-     */
-    private $resources_storage_instance;
+        parent::__construct($app, $this->getName(), $this->getModulePath());
+    }
 
     /**
      * Main boot init.
      */
     public function boot()
     {
-        $this->initVariables();
-        $this->registerTranslations();
-        $this->registerRoutes();
-        $this->registerFactories();
-        $this->loadMigrations();
-        $this->registerBladeDirective();
-        $this->registerViews();
-        $this->registerNavigation();
+        parent::boot();
     }
 
     /**
@@ -127,103 +42,44 @@ class ServiceProvider extends MainServiceProvider
      */
     public function register()
     {
+        $this->getUnresolvedRequirements();
+        parent::register();
     }
 
     /**
-     * Register menu item in admin sidebar.
-     */
-    public function registerNavigation()
-    {
-        if ($adminSidenav = \Menu::instance('admin.sidenav')) {
-            $adminSidenav->route('admin.'.$this->name, $this->navname, null, [
-                'icon' => 'fa fa-fw fa-comments-o',
-                'new' => 0,
-            ]);
-        }
-    }
-
-    /**
-     * Register translations.
-     */
-    public function registerTranslations()
-    {
-        $langPath = resource_path(self::$components_path['main_lang'].$this->name);
-
-        if ($this->is_exists()) {
-            if (is_dir($langPath)) {
-                $this->loadTranslationsFrom($langPath, $this->prefix.$this->name);
-            } else {
-                $this->loadTranslationsFrom($this->module_path.self::$components_path['module_lang'], $this->prefix.$this->name);
-            }
-        }
-
-        $this->navname = trans($this->prefix.$this->name.'::admin/sidenav.name');
-    }
-
-    /**
-     * Register routes.
+     * Init main module data, like a name or root path.
      *
      * @throws \Exception
      */
-    public function registerRoutes()
+    private function initVariables()
     {
-        $path_routes = $this->module_path.self::$components_path['routes'];
-
-        if (!app()->routesAreCached()) {
-            if ($this->is_exists(self::$components_path['routes'], ['is_file' => true])) {
-                require_once $path_routes;
-            }
+        try {
+            preg_match_all('/([^\\\]+\\\){1}(?<module>.*?)\\\/ims', static::class, $module_names);
+            $this->setNamespaceName((isset($module_names['module'][0])) ? $module_names['module'][0] : $this->getNamespaceName());
+            $this->setName(strtolower($this->getNamespaceName()));
+            $this->setPath($this->getModuleStorageInstance()->path($this->getNamespaceName()).\DIRECTORY_SEPARATOR);
+            $this->setModulePath($this->getPath());
+        } catch (\Exception $e) {
+            $this->getModuleLogs()->error($e);
+            throw new \Exception($e.'Look at the provider, something wrong with get module path or init class variables');
         }
     }
 
     /**
-     * Register views.
-     *
-     * @throws \Exception
+     * Load bases components for work with module
      */
-    public function registerViews()
+    private function loadCoreComponents()
     {
-        $view_path_main = resource_path(self::$components_path['main_view'].$this->name);
-        $view_path_module = $this->module_path.self::$components_path['module_view'];
-
-        if ($this->is_exists(self::$components_path['module_view'])) {
-            $this->publishes([
-                $view_path_module => $view_path_main,
-            ], 'views');
-
-            $this->loadViewsFrom(array_merge(array_map(function ($path) {
-                return $path.self::$components_path['modules'].\DIRECTORY_SEPARATOR.$this->name;
-            }, \Config::get('view.paths')), [$view_path_module]), $this->name);
+        if (!$this->getModuleLogs() instanceof Log) {
+            $this->setModuleLogs(Log::channel($this::LOGS_CHANNEL));
         }
-    }
 
-    /**
-     * Registration module factories.
-     *
-     * @throws \Exception
-     */
-    public function registerFactories()
-    {
-        $factory_path = $this->module_path.self::$components_path['module_factories'];
-
-        if ($this->is_exists(self::$components_path['module_factories'])) {
-            if (!app()->environment('production')) {
-                app(Factory::class)->load($factory_path);
-            }
+        if (!$this->getModuleStorageInstance() instanceof Storage) {
+            $this->setModuleStorageInstance(Storage::disk($this::PATH_MODULES));
         }
-    }
 
-    /**
-     * Load module migrations.
-     *
-     * @throws \Exception
-     */
-    public function loadMigrations()
-    {
-        $migration_path = $this->module_path.self::$components_path['module_migrations'];
-
-        if ($this->is_exists(self::$components_path['module_migrations'])) {
-            $this->loadMigrationsFrom($migration_path);
+        if (!$this->getResourcesStorageInstance() instanceof Storage) {
+            $this->setResourcesStorageInstance(Storage::disk($this::PATH_RESOURCES));
         }
     }
 
@@ -234,131 +90,58 @@ class ServiceProvider extends MainServiceProvider
      */
     public function registerConfig()
     {
-        $config_path = $this->module_path.self::$components_path['module_config'];
+        $this->setModuleFacade(null);
+        $config_path = $this->getModulePath() . $this::CONFIG_PATH;
 
-        if ($this->is_exists(self::$components_path['module_config'], ['is_file' => true])) {
+        if ($this->is_exists($this::CONFIG_PATH, ['is_file' => true])) {
+            $load_config = require_once $config_path;
+
             $this->publishes([
-                $config_path => config_path($this->prefix.$this->name.'.php'),
+                $config_path => config_path($this->getPrefix().$this->getName().'.php'),
             ], 'config');
+
+            if (!empty($load_config) && isset($load_config['FacadeName'])) {
+                $this->setModuleFacade($load_config['FacadeName']);
+            }
 
             $this->mergeConfigFrom(
                 $config_path,
-                $this->prefix.$this->name
+                $this->getPrefix().$this->getName()
             );
         }
     }
 
     /**
-     * Registration blade directive.
+     * Getter/setter for varchars
+     *
+     * @param null $variable
+     * @param array $params
+     * @return mixed
      */
-    public function registerBladeDirective()
-    {
-    }
+    public function __call($variable = null, $params = []) {
+        $filter = preg_replace('/^get|^set/imus', '', $variable);
+        $filter_under = preg_replace_callback('/_([^_]+)/imus', function ($m) {
+            return ucfirst($m[1]);
+        }, $filter);
 
-    /**
-     * Init main module data, like a name or root path.
-     *
-     * @throws \Exception
-     */
-    private function initVariables()
-    {
-        if (!$this->module_logs instanceof Log) {
-            $this->module_logs = Log::channel(self::LOGS_CHANNEL);
-            $this->module_logs->info('Init "'.self::LOGS_CHANNEL.'" channel for logs!');
+        $filter_upper = preg_replace_callback('/([A-Z]{1})/mus', function ($m) {
+            return '_'.lcfirst($m[1]);
+        }, $filter);
+
+        $filter_upper = preg_replace('/^_/', '', $filter_upper);
+
+        if (property_exists(self::class, $filter_under) || property_exists(self::class, $filter_upper)) {
+            $filter = (property_exists(self::class, $filter_under)) ? $filter_under : $filter_upper;
+
+            if (count($params)) {
+                $this->$filter = $params[array_keys($params)[0]];
+            }
+
+            return $this->$filter;
         }
 
-        try {
-            if (!$this->module_storage_instance instanceof Storage) {
-                $this->module_storage_instance = Storage::disk(self::PATH_MODULES);
-            }
-
-            if (!$this->resources_storage_instance instanceof Storage) {
-                $this->resources_storage_instance = Storage::disk(self::PATH_RESOURCES);
-            }
-
-            preg_match_all('/([^\\\]+\\\){1}(?<module>.*?)\\\/ims', static::class, $module_names);
-            $this->namespace_name = (isset($module_names['module'][0])) ? $module_names['module'][0] : $this->namespace_name;
-            $this->name = strtolower($this->namespace_name);
-            $this->module_path = $this->module_storage_instance->path($this->namespace_name).\DIRECTORY_SEPARATOR;
-        } catch (\Exception $e) {
-            $this->module_logs->error($e);
-
-            throw new \Exception($e.'Look at the provider, something wrong with get module path or init class variables');
+        if (!method_exists(self::class, $variable)) {
+            throw new BadMethodCallException("Method {$variable} does not exist.");
         }
-    }
-
-    /**
-     * Function for check file.
-     *
-     * @param string $path
-     * @param array  ...$args Can contain array
-     *                        with key-value:
-     *                        is_file bool false - Check $path is file
-     *                        instance string 'module' - Available check disks: self::PATH_RESOURCES, self::PATH_MODULES
-     *                        create_dir bool true - If we check only directory, we can try to create folder in process
-     *                        exception bool false - If file/dir not exists, show exception
-     *                        exception_message string - Custom message for exception
-     *
-     * @throws \Exception
-     *
-     * @return bool
-     */
-    private function is_exists(string $path = '', array ...$args)
-    {
-        $is_file = false;
-        $create_dir = true;
-        $exception = false;
-        $exception_message = 'File or directory not exists:'.$path;
-        $that_file = $that_dir = $status = $instance_init = false;
-        $instance = $this->module_storage_instance;
-
-        if (\count($args)) {
-            foreach ($args[0] as $key => $value) {
-                if ('is_file' === $key) {
-                    $is_file = (bool) $value;
-                } elseif ('exception' === $key) {
-                    $exception = (bool) $value;
-                } elseif ('create_dir' === $key) {
-                    $create_dir = (bool) $value;
-                } elseif ('exception_message' === $key) {
-                    $exception_message = (string) $value;
-                } elseif ('instance' === $key) {
-                    $instance = (self::PATH_RESOURCES === $value) ? $this->resources_storage_instance : $instance;
-                    $instance_init = (self::PATH_RESOURCES === $value);
-                }
-            }
-        }
-
-        $path = (!$instance_init) ? $this->namespace_name.\DIRECTORY_SEPARATOR.$path : $path;
-
-        $exists = $instance->exists($path);
-
-        if ($exists) {
-            $mime = $instance->getMimetype($path);
-
-            if ('directory' === $mime) {
-                $that_dir = true;
-            } else {
-                $that_file = true;
-            }
-        } else {
-            if ($create_dir && !$that_dir && !$that_file) {
-                $that_dir = $instance->makeDirectory($path);
-            }
-
-            if (!$exception && !$that_dir) {
-                return $status;
-            }
-        }
-
-        $status = ($is_file && $that_file || !$is_file && $that_dir);
-
-        if ($exception && (!$exists || !$status)) {
-            $this->module_logs->error($exception_message);
-
-            throw new \Exception($exception_message);
-        }
-
-        return $status;
     }
 }
