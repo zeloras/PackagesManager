@@ -100,7 +100,7 @@ class ServiceProvider extends ChildServiceProvider
                 $config_path => config_path($this->getPrefix().$this->getName().'.php'),
             ], 'config');
 
-            if (!empty($load_config) && isset($load_config['FacadeName'])) {
+            if (isset($load_config['FacadeName']) && !is_array($load_config['FacadeName'])) {
                 $this->setModuleFacade($load_config['FacadeName']);
             }
 
@@ -108,6 +108,13 @@ class ServiceProvider extends ChildServiceProvider
                 $config_path,
                 $this->getPrefix().$this->getName()
             );
+
+            $module_config = \Config::get($this->getPrefix().$this->getName(), []);
+
+            if (!empty($module_config)) {
+                $this->setModuleConfig($module_config);
+                $module_config = null;
+            }
         }
     }
 

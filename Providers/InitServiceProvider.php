@@ -3,17 +3,24 @@
 namespace GeekCms\PackagesManager\Providers;
 
 use GeekCms\PackagesManager\Support\ServiceProvider as MainServiceProvider;
+use Modules\Menu\Libs\Admin\AdminSidenav;
 
 /**
- * Class PackagesServiceProvider.
+ * Class InitServiceProvider.
  */
-class PackagesServiceProvider extends MainServiceProvider
+class InitServiceProvider extends MainServiceProvider
 {
     /**
      * {@inheritdoc}
      */
     public function registerNavigation()
     {
+
+        \Menu::create('admin.sidenav', function ($menu) {
+            $menu->setPresenter(AdminSidenav::class);
+            $menu->route('admin', trans($this->getPrefix() . $this->getName().'::admin/sidenav.Dashboard'), [], null, ['icon' => 'fa fa-fw fa-tachometer']);
+        });
+
         if ($adminSidenav = \Menu::instance('admin.sidenav')) {
             $adminSidenav->dropdown(
                 $this->getNavname(),

@@ -28,7 +28,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "GeekCms\\PackagesManager\\Providers\\PackagesServiceProvider",
+                "GeekCms\\PackagesManager\\Providers\\InitServiceProvider",
                 "GeekCms\\PackagesManager\\Providers\\EventServiceProvider"
             ],
             "aliases": {

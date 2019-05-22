@@ -15,4 +15,5 @@ return [
     'name' => 'Module manager',
     'installed' => 'Installed',
     'lists' => 'Lists',
+    'Dashboard' => 'Dashboard'
 ];

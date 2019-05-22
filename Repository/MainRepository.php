@@ -2,10 +2,10 @@
 
 namespace GeekCms\PackagesManager\Repository;
 
-use Nwidart\Modules\FileRepository as ModuleRepositrory;
+use GeekCms\PackagesManager\Repository\Template\MainRepositoryAbstract;
 use Nwidart\Modules\Laravel\Module;
 
-class FileRepository extends ModuleRepositrory
+class MainRepository extends MainRepositoryAbstract
 {
     /**
      * {@inheritdoc}

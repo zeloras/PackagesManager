@@ -6,7 +6,7 @@ use Illuminate\Container\Container;
 use Illuminate\Database\Eloquent\Factory;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\Facades\Storage;
-use GeekCms\PackagesManager\Repository\FileRepository;
+use GeekCms\PackagesManager\Repository\MainRepository;
 use Nwidart\Modules\Module as MainModule;
 
 /**
@@ -89,6 +89,13 @@ abstract class ChildServiceProvider extends MainModule
     protected $module_path = '';
 
     /**
+     * Will contain module settings
+     *
+     * @var array
+     */
+    protected $module_config = [];
+
+    /**
      * Config contain base paths for module components.
      *
      * @var array
@@ -163,7 +170,7 @@ abstract class ChildServiceProvider extends MainModule
         if (!empty($this->getModuleFacade())) {
             $this->app->singleton($this->getModuleFacade(), function ($app) {
                 $path = base_path('Modules');
-                return new FileRepository($app, $path);
+                return new MainRepository($app, $path);
             });
         }
     }
@@ -187,14 +194,10 @@ abstract class ChildServiceProvider extends MainModule
      */
     public function registerTranslations()
     {
-        $langPath = resource_path(self::$components_path['main_lang'].$this->getName());
+        $langModulePath = $this->getModulePath() . self::$components_path['module_lang'];
 
-        if ($this->is_exists($langPath)) {
-            if ($this->is_exists($langPath, ['is_file' => true])) {
-                $this->loadTranslationsFrom($langPath, $this->getPrefix() . $this->getName());
-            } else {
-                $this->loadTranslationsFrom($this->getModulePath() . self::$components_path['module_lang'], $this->getPrefix() . $this->getName());
-            }
+        if ($this->is_exists(self::$components_path['module_lang'])) {
+            $this->loadTranslationsFrom($langModulePath, $this->getPrefix() . $this->getName());
         }
 
         $this->setNavname(trans($this->getPrefix() . $this->getName().'::admin/sidenav.name'));
@@ -326,6 +329,29 @@ abstract class ChildServiceProvider extends MainModule
      */
     public function registerAliases()
     {
+        /**
+         * Try load and set alias for "light" version, light version it's like a helper
+         */
+        $config = $this->getModuleConfig();
+        if (isset($config['FacadeName']['alias']) && is_array($config['FacadeName'])) {
+            try {
+                $aliasName = $config['FacadeName']['alias'];
+                $facadeClass = get_class(new $config['FacadeName']['facadePath']());
+                $repoClass = new $config['FacadeName']['mainRepoPath']();
+
+                if (!class_exists($aliasName)) {
+                    $this->app->bind($aliasName, function ($app) use ($repoClass) {
+                        return $repoClass::getInstance();
+                    });
+                    $this->app->instance(get_class($repoClass), $repoClass::getInstance());
+                    class_alias($facadeClass, $aliasName);
+                }
+            } catch (\Exception $e) {
+                $this->getModuleLogs()->error($e);
+                throw new \Exception($e);
+            }
+        }
+
         $loader = AliasLoader::getInstance();
         foreach ($this->get('aliases', []) as $aliasName => $aliasClass) {
             $loader->alias($aliasName, $aliasClass);

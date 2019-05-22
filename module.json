@@ -4,9 +4,9 @@
     "description": "",
     "keywords": [],
     "active": 1,
-    "order": 0,
+    "order": -1,
     "providers": [
-        "GeekCms\\PackagesManager\\Providers\\PackagesServiceProvider",
+        "GeekCms\\PackagesManager\\Providers\\InitServiceProvider",
         "GeekCms\\PackagesManager\\Providers\\EventServiceProvider"
     ],
     "aliases": {
@@ -16,6 +16,6 @@
         "loader.php"
     ],
     "requires": [
-
+        "Nwidart\\Modules"
     ]
 }
