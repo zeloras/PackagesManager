@@ -1,4 +1,8 @@
 <?php
 return [
-    'FacadeName' => 'packageFacade'
+    'FacadeName' => [
+        'alias' => 'Packages',
+        'facadePath' => 'GeekCms\PackagesManager\Facades\Packages',
+        'mainRepoPath' => 'GeekCms\PackagesManager\Repository\MainRepository',
+    ]
 ];
