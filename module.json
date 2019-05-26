@@ -10,12 +10,17 @@
         "GeekCms\\PackagesManager\\Providers\\EventServiceProvider"
     ],
     "aliases": {
-        "Packages": "GeekCms\\PackagesManager\\Facades\\Packages"
     },
     "files": [
         "loader.php"
     ],
     "requires": [
         "Nwidart\\Modules"
-    ]
+    ],
+    "packages-authors": [
+        "zeloras",
+        "ponich",
+        "geekcms"
+    ],
+    "packages-tag": "geekcms-module"
 }
