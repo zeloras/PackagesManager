@@ -7,10 +7,36 @@ use GeekCms\PackagesManager\Repository\Template\MainRepositoryAbstract;
 class RemoteRepository extends MainRepositoryAbstract
 {
     /**
-     * Prepare repositories list
+     * {@inheritdoc}
+     */
+    public function getOfficialPackages()
+    {
+        if (empty($this->modules[self::PACKAGE_OFFICIAL])) {
+            $this->modules[self::PACKAGE_OFFICIAL] = $this->getRepositories()[self::PACKAGE_OFFICIAL];
+        }
+
+        return $this->modules[self::PACKAGE_OFFICIAL];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getUnofficialPackages()
+    {
+        if (empty($this->modules[self::PACKAGE_UNOFFICIAL])) {
+            $modules = $this->getRepositories()[self::PACKAGE_OFFICIAL];
+            $this->modules[self::PACKAGE_UNOFFICIAL] = $this->getForksModules($modules);
+        }
+
+        return $this->modules[self::PACKAGE_UNOFFICIAL];
+    }
+
+    /**
+     * Prepare repositories list.
+     *
+     * @throws \Nwidart\Modules\Exceptions\ModuleNotFoundException
      *
      * @return array
-     * @throws \Nwidart\Modules\Exceptions\ModuleNotFoundException
      */
     protected function getRepositories()
     {
@@ -24,42 +50,18 @@ class RemoteRepository extends MainRepositoryAbstract
     }
 
     /**
-     * @inheritDoc
-     */
-    public function getOfficialPackages()
-    {
-        if (empty($this->modules[self::PACKAGE_OFFICIAL])) {
-            $this->modules[self::PACKAGE_OFFICIAL] = $this->getRepositories()[self::PACKAGE_OFFICIAL];
-        }
-
-        return $this->modules[self::PACKAGE_OFFICIAL];
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getUnofficialPackages()
-    {
-        if (empty($this->modules[self::PACKAGE_UNOFFICIAL])) {
-            $modules = $this->getRepositories()[self::PACKAGE_OFFICIAL];
-            $this->modules[self::PACKAGE_UNOFFICIAL] = $this->getForksModules($modules);
-        }
-
-        return $this->modules[self::PACKAGE_UNOFFICIAL];
-    }
-
-    /**
-     * Send curl request to git
+     * Send curl request to git.
      *
      * @param string $url
+     *
      * @return mixed
      */
     protected function getGitData($url = '')
     {
         $headers = [
-            "Host: api.github.com",
-            "User-Agent: curl/7.52.1",
-            "Accept: */*",
+            'Host: api.github.com',
+            'User-Agent: curl/7.52.1',
+            'Accept: */*',
         ];
 
         $ch = curl_init($url);
@@ -69,13 +71,15 @@ class RemoteRepository extends MainRepositoryAbstract
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
         $result = curl_exec($ch);
         curl_close($ch);
+
         return json_decode($result, true);
     }
 
     /**
-     * Get last module version with info by repo project url
+     * Get last module version with info by repo project url.
      *
      * @param null $url
+     *
      * @return array
      */
     protected function getLastRelease($url = null)
@@ -84,7 +88,7 @@ class RemoteRepository extends MainRepositoryAbstract
         $last_release = [];
 
         if (!empty($url)) {
-            $releases = $this->getGitData($url . '/releases');
+            $releases = $this->getGitData($url.'/releases');
             if (!empty($releases)) {
                 foreach ($releases as $release) {
                     $release_date = strtotime($release['published_at']);
@@ -95,7 +99,7 @@ class RemoteRepository extends MainRepositoryAbstract
                             'version' => $release['tag_name'],
                             'download' => $release['zipball_url'],
                             'date' => $release_date,
-                            'url' => $release['html_url']
+                            'url' => $release['html_url'],
                         ];
                     }
                 }
@@ -106,18 +110,19 @@ class RemoteRepository extends MainRepositoryAbstract
     }
 
     /**
-     * Get official developers and groups
+     * Get official developers and groups.
      *
      * @param null $module
+     *
      * @return array
      */
     protected function getDevelopers($module = null)
     {
         $authors = [];
         if (!empty($module)) {
-            $authors = $module->get("packages-authors", null);
+            $authors = $module->get('packages-authors', null);
             foreach ($authors as $uid => $author) {
-                $authors[$uid] = preg_replace("/\*name\*/ims", $author, self::REPO_USER_LINK);
+                $authors[$uid] = preg_replace('/\\*name\\*/ims', $author, self::REPO_USER_LINK);
             }
         }
 
@@ -125,30 +130,31 @@ class RemoteRepository extends MainRepositoryAbstract
     }
 
     /**
-     * Get official modules and all forks
+     * Get official modules and all forks.
      *
      * @param array $authors
-     * @param null $module
+     * @param null  $module
+     *
      * @return array
      */
     protected function getMainModules($authors = [], $module = null)
     {
         $modules = [];
         if (!empty($authors) && !empty($module)) {
-            $tag = $module->get("packages-tag", null);
+            $tag = $module->get('packages-tag', null);
 
             foreach ($authors as $author) {
                 $result = $this->getGitData($author);
                 if (!empty($result)) {
                     foreach ($result as $repo) {
-                        if (preg_match('/\#' . $tag . '/', $repo['description'])) {
+                        if (preg_match('/\#'.$tag.'/', $repo['description'])) {
                             $release = $this->getLastRelease($repo['url']);
                             $modules[] = [
                                 'name' => $repo['name'],
                                 'description' => $repo['description'],
                                 'release' => $release,
                                 'url' => $repo['html_url'],
-                                'forks' => ($repo['forks']) ? $repo['forks_url'] : null
+                                'forks' => ($repo['forks']) ? $repo['forks_url'] : null,
                             ];
                         }
                     }
@@ -160,9 +166,10 @@ class RemoteRepository extends MainRepositoryAbstract
     }
 
     /**
-     * Get unofficial packages list
+     * Get unofficial packages list.
      *
      * @param array $modules
+     *
      * @return array
      */
     protected function getForksModules($modules = [])

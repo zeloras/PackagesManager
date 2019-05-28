@@ -7,7 +7,7 @@ use GeekCms\PackagesManager\Repository\Template\MainRepositoryAbstract;
 class LocalRepository extends MainRepositoryAbstract
 {
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function getOfficialPackages()
     {
@@ -15,7 +15,7 @@ class LocalRepository extends MainRepositoryAbstract
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function getUnofficialPackages()
     {

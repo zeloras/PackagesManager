@@ -2,17 +2,17 @@
 
 namespace GeekCms\PackagesManager\Repository\Template;
 
+use GeekCms\PackagesManager\Repository\LocalRepository;
 use GeekCms\PackagesManager\Repository\MainRepository;
+use GeekCms\PackagesManager\Repository\RemoteRepository;
 use Illuminate\Container\Container;
 use Nwidart\Modules\FileRepository as ModuleRepository;
-use GeekCms\PackagesManager\Repository\LocalRepository;
-use GeekCms\PackagesManager\Repository\RemoteRepository;
 use Nwidart\Modules\Laravel\Module;
 
 abstract class MainRepositoryAbstract extends ModuleRepository
 {
     /**
-     * Constants for filter something or get lists with needed packages
+     * Constants for filter something or get lists with needed packages.
      */
     const PACKAGE_OFFICIAL = 'official';
     const PACKAGE_UNOFFICIAL = 'unofficial';
@@ -26,7 +26,7 @@ abstract class MainRepositoryAbstract extends ModuleRepository
     const REPO_GROUP_LINK = 'https://api.github.com/orgs/*name*/repos';
 
     /**
-     * Load classes for work with remote packages or local(downloaded)
+     * Load classes for work with remote packages or local(downloaded).
      *
      * @var string
      */
@@ -34,14 +34,14 @@ abstract class MainRepositoryAbstract extends ModuleRepository
     protected $packages_remote = RemoteRepository::class;
 
     /**
-     * Repositories with official and unofficial modules
+     * Repositories with official and unofficial modules.
      *
      * @var array
      */
     protected $modules = [self::PACKAGE_OFFICIAL => [], self::PACKAGE_UNOFFICIAL => []];
 
     /**
-     * For switch to back main class
+     * For switch to back main class.
      *
      * @var
      */
@@ -49,8 +49,9 @@ abstract class MainRepositoryAbstract extends ModuleRepository
 
     /**
      * MainRepositoryAbstract constructor.
-     * @param Container $app
-     * @param null $path
+     *
+     * @param Container      $app
+     * @param null           $path
      * @param MainRepository $instance
      */
     public function __construct(Container $app, $path = null, MainRepository $instance = null)
@@ -60,18 +61,11 @@ abstract class MainRepositoryAbstract extends ModuleRepository
     }
 
     /**
-     * @inheritDoc
-     */
-    protected function createModule(...$args)
-    {
-        return new Module(...$args);
-    }
-
-    /**
-     * Get official packages list
+     * Get official packages list.
+     *
+     * @throws \Nwidart\Modules\Exceptions\ModuleNotFoundException
      *
      * @return mixed
-     * @throws \Nwidart\Modules\Exceptions\ModuleNotFoundException
      */
     public function getOfficialPackages()
     {
@@ -79,10 +73,11 @@ abstract class MainRepositoryAbstract extends ModuleRepository
     }
 
     /**
-     * Get unofficial packages list
+     * Get unofficial packages list.
+     *
+     * @throws \Nwidart\Modules\Exceptions\ModuleNotFoundException
      *
      * @return mixed
-     * @throws \Nwidart\Modules\Exceptions\ModuleNotFoundException
      */
     public function getUnofficialPackages()
     {
@@ -90,7 +85,7 @@ abstract class MainRepositoryAbstract extends ModuleRepository
     }
 
     /**
-     * Switch to main class
+     * Switch to main class.
      *
      * @return MainRepository
      */
@@ -99,4 +94,11 @@ abstract class MainRepositoryAbstract extends ModuleRepository
         return $this->main_instance;
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    protected function createModule(...$args)
+    {
+        return new Module(...$args);
+    }
 }

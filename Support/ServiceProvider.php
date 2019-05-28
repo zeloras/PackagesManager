@@ -13,7 +13,7 @@ class ServiceProvider extends ChildServiceProvider
     {
         parent::registerConfig();
         $module_config = \Config::get($this->getPrefix().$this->getName(), []);
-        if (isset($module_config['FacadeName']) && !is_array($module_config['FacadeName'])) {
+        if (isset($module_config['FacadeName']) && !\is_array($module_config['FacadeName'])) {
             $this->setModuleFacade($module_config['FacadeName']);
         }
 

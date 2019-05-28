@@ -15,26 +15,27 @@ class InitServiceProvider extends MainServiceProvider
      */
     public function registerNavigation()
     {
-
         \Menu::create('admin.sidenav', function ($menu) {
             $menu->setPresenter(AdminSidenav::class);
-            $menu->route('admin', trans($this->getPrefix() . $this->getName().'::admin/sidenav.Dashboard'), [], null, ['icon' => 'fa fa-fw fa-tachometer']);
+            $menu->route('admin', $this->getPrefix().$this->getName().'::admin/sidenav.Dashboard', [], null, [
+                'icon' => 'font-icon font-icon-dashboard',
+            ]);
         });
 
         if ($adminSidenav = \Menu::instance('admin.sidenav')) {
             $adminSidenav->dropdown(
                 $this->getNavname(),
                 function ($sub) {
-                    $sub->route('admin.packages', trans($this->getPrefix() . $this->getName().'::admin/sidenav.installed'), null, [
-                        'icon' => 'fa fa-fw fa-cogs',
+                    $sub->route($this->getAdminRoutePrefix().'packages', $this->getPrefix().$this->getName().'::admin/sidenav.installed', null, [
+                        'icon' => 'font-icon font-icon-archive',
                     ]);
 
-                    $sub->route('admin.packages.list', trans($this->getPrefix() . $this->getName().'::admin/sidenav.lists'), null, [
-                        'icon' => 'fa fa-fw fa-shopping-basket',
+                    $sub->route($this->getAdminRoutePrefix().'packages.list', $this->getPrefix().$this->getName().'::admin/sidenav.lists', null, [
+                        'icon' => 'font-icon font-icon-earth-bordered',
                     ]);
                 },
                 null,
-                ['icon' => 'fa fa-fw fa-dropbox']
+                ['icon' => 'font-icon font-icon-github']
             );
         }
     }

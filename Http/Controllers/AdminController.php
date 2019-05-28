@@ -18,6 +18,7 @@ class AdminController extends Controller
     public function index()
     {
         $off = Packages::setRemote();
+
         return view('packagesmanager::admin/index');
     }
 
