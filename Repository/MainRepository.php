@@ -2,21 +2,12 @@
 
 namespace GeekCms\PackagesManager\Repository;
 
+use Nwidart\Modules\FileRepository;
 use Nwidart\Modules\Laravel\Module;
 use Nwidart\Modules\Module as MainModule;
-use Nwidart\Modules\FileRepository;
-
 
 class MainRepository extends FileRepository
 {
-    /**
-     * {@inheritdoc}
-     */
-    protected function createModule(...$args)
-    {
-        return new Module(...$args);
-    }
-
     /**
      * Sort all downloaded modules by priority for forward init.
      *
@@ -25,18 +16,19 @@ class MainRepository extends FileRepository
      *
      * @return array
      */
-    public function sortModulesListPriority(array $modules = [], $sorted_list = []) : array
+    public function sortModulesListPriority(array $modules = [], $sorted_list = []): array
     {
         /**
-         * Function for cut namespace for work with results forward
+         * Function for cut namespace for work with results forward.
          *
          * @param string $namespace
-         * @param int $size
-         * @return string|string[]|null
+         * @param int    $size
+         *
+         * @return null|string|string[]
          */
         $trims = function ($namespace = '', int $size = 1) {
             if (!empty($namespace)) {
-                preg_match_all('/^(?<module>([^\\\]+\\\){' . $size . '})/imus', $namespace, $find);
+                preg_match_all('/^(?<module>([^\\\]+\\\){'.$size.'})/imus', $namespace, $find);
                 if (isset($find['module'][0]) && !empty($find['module'][0])) {
                     $namespace = preg_replace('/\\\$/ims', '', $find['module'][0]);
                 }
@@ -45,9 +37,7 @@ class MainRepository extends FileRepository
             return $namespace;
         };
 
-        /**
-         * Sort array by load "weight"
-         */
+        // Sort array by load "weight"
         uasort($modules, function (MainModule $a, MainModule $b) use ($sorted_list, $trims) {
             $amin = $bmin = 0;
             if (!empty($sorted_list)) {
@@ -60,7 +50,7 @@ class MainRepository extends FileRepository
             $left = $a->order + $amin;
             $right = $b->order + $bmin;
 
-            if ($left == $right) {
+            if ($left === $right) {
                 return (int) $left;
             }
 
@@ -73,7 +63,7 @@ class MainRepository extends FileRepository
     /**
      * Function for call some sort functions,
      * for recursive sort and build list
-     * for register active modules
+     * for register active modules.
      *
      * @return array
      */
@@ -92,21 +82,19 @@ class MainRepository extends FileRepository
                     continue;
                 }
 
-                $check = preg_grep("/^" . preg_quote($item, "/") . ".*?/i", get_declared_classes());
+                $check = preg_grep('/^'.preg_quote($item, '/').'.*?/i', get_declared_classes());
                 if ($check) {
                     $preload_modules[$item] = $count;
-                    $count++;
+                    ++$count;
                 }
             }
         }
 
-        $sorted = $this->sortModulesListPriority($local_modules, $preload_modules);
-
-        return $sorted;
+        return $this->sortModulesListPriority($local_modules, $preload_modules);
     }
 
     /**
-     * Switch to local modules class
+     * Switch to local modules class.
      *
      * @return LocalRepository
      */
@@ -116,7 +104,7 @@ class MainRepository extends FileRepository
     }
 
     /**
-     * Switch to remote modules class
+     * Switch to remote modules class.
      *
      * @return RemoteRepository
      */
@@ -126,10 +114,18 @@ class MainRepository extends FileRepository
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function setMain()
     {
         return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function createModule(...$args)
+    {
+        return new Module(...$args);
     }
 }
