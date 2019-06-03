@@ -6,8 +6,6 @@ use BadMethodCallException;
 use Illuminate\Container\Container;
 use Illuminate\Database\Eloquent\Factory;
 use Illuminate\Foundation\AliasLoader;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage as StorageFacade;
 use Nwidart\Modules\Module as MainModule;
 
 /**
@@ -38,9 +36,9 @@ use Nwidart\Modules\Module as MainModule;
  * @method string    getModuleLogs()
  * @method string    setModuleLogs(string $name)
  * @method string    getModuleStorageInstance()
- * @method string    setModuleStorageInstance(Storage $name)
+ * @method string    setModuleStorageInstance(StorageFacade $name)
  * @method string    getResourcesStorageInstance()
- * @method string    setResourcesStorageInstance(Storage $name)
+ * @method string    setResourcesStorageInstance(StorageFacade $name)
  */
 abstract class CoreComponent extends MainModule
 {
@@ -126,6 +124,10 @@ abstract class CoreComponent extends MainModule
      * @var string
      */
     protected $module_path = '';
+
+    /**
+     * @internal
+     */
     protected $path;
 
     /**
@@ -162,14 +164,14 @@ abstract class CoreComponent extends MainModule
     /**
      * Storage instances for work with filesystem in module dir.
      *
-     * @var Storage
+     * @var StorageFacade
      */
     protected $module_storage_instance;
 
     /**
      * Storage instances for work with filesystem in root/resources dir.
      *
-     * @var Storage
+     * @var StorageFacade
      */
     protected $resources_storage_instance;
 
@@ -185,11 +187,6 @@ abstract class CoreComponent extends MainModule
         $this->setApp($app);
         $this->loadCoreComponents();
         $this->initVariables();
-        $this->registerConfig();
-        $this->registerFiles();
-        $this->registerProviders();
-        $this->registerAliases();
-        $this->registerFacades();
         parent::__construct($app, $this->getName(), $this->getModulePath());
         parent::fireEvent('constructor');
     }
@@ -238,6 +235,8 @@ abstract class CoreComponent extends MainModule
     public function boot()
     {
         $this->loadCoreComponents();
+        $this->initVariables();
+
         $this->registerTranslations();
         $this->registerRoutes();
         $this->registerFactories();
@@ -253,6 +252,16 @@ abstract class CoreComponent extends MainModule
      */
     public function register()
     {
+
+        $this->loadCoreComponents();
+        $this->initVariables();
+
+        $this->registerConfig();
+        $this->registerFiles();
+        $this->registerProviders();
+        $this->registerAliases();
+        $this->registerFacades();
+
         $this->registerNavigation();
         parent::fireEvent('register');
     }
@@ -265,7 +274,6 @@ abstract class CoreComponent extends MainModule
     public function registerConfig()
     {
         $config_path = $this->getModulePath().$this::CONFIG_PATH;
-
         if ($this->is_exists($this::CONFIG_PATH, ['is_file' => true])) {
             $this->publishes([
                 $config_path => config_path($this->getPrefix().$this->getName().'.php'),
@@ -300,6 +308,7 @@ abstract class CoreComponent extends MainModule
 
         foreach ($files as $file) {
             $path = base_path($this->getPath().\DIRECTORY_SEPARATOR.$file);
+
             if ($this->is_exists($path, ['is_file' => true])) {
                 require $path;
             }
@@ -463,17 +472,17 @@ abstract class CoreComponent extends MainModule
      */
     protected function loadCoreComponents()
     {
-        if (!$this->getModuleLogs() instanceof Log) {
-            $this->setModuleLogs(Log::channel($this::LOGS_CHANNEL));
+        if (!$this->getModuleLogs() instanceof \Log) {
+            $this->setModuleLogs(\Log::channel($this::LOGS_CHANNEL));
         }
 
-        if (class_exists('StorageFacade') && class_exists("Filesystem")) {
-            if (!$this->getModuleStorageInstance() instanceof StorageFacade) {
-                $this->setModuleStorageInstance(StorageFacade::disk($this::PATH_MODULES));
+        if (class_exists('Storage')) {
+            if (!$this->getModuleStorageInstance() instanceof \Storage) {
+                $this->setModuleStorageInstance(\Storage::disk($this::PATH_MODULES));
             }
 
-            if (!$this->getResourcesStorageInstance() instanceof StorageFacade) {
-                $this->setResourcesStorageInstance(StorageFacade::disk($this::PATH_RESOURCES));
+            if (!$this->getResourcesStorageInstance() instanceof \Storage) {
+                $this->setResourcesStorageInstance(\Storage::disk($this::PATH_RESOURCES));
             }
         }
     }
@@ -489,11 +498,7 @@ abstract class CoreComponent extends MainModule
             preg_match_all('/([^\\\]+\\\){1}(?<module>.*?)\\\/ims', static::class, $module_names);
             $this->setNamespaceName((isset($module_names['module'][0])) ? $module_names['module'][0] : $this->getNamespaceName());
             $this->setName(strtolower($this->getNamespaceName()));
-            if (!empty($this->getModuleStorageInstance())) {
-                $this->setPath($this->getModuleStorageInstance()->path($this->getNamespaceName()).\DIRECTORY_SEPARATOR);
-            } else {
-                $this->setPath(base_path('Modules') . \DIRECTORY_SEPARATOR . $this->getNamespaceName().\DIRECTORY_SEPARATOR);
-            }
+            $this->setPath($this->getModuleStorageInstance()->path($this->getNamespaceName()).\DIRECTORY_SEPARATOR);
             $this->setModulePath($this->getPath());
             $this->setNavname($this->getPrefix().$this->getName().'::admin/sidenav.name');
 
@@ -548,14 +553,10 @@ abstract class CoreComponent extends MainModule
 
         $path = (!$instance_init) ? $this->getNamespaceName().\DIRECTORY_SEPARATOR.$path : $path;
 
-        $exists = (!empty($instance)) ? $instance->exists($path) : file_exists(base_path('Modules') . DIRECTORY_SEPARATOR . $path);
+        $exists = $instance->exists($path);
 
         if ($exists) {
-            if (!empty($instance)) {
-                $mime = $instance->getMimetype($path);
-            } else {
-                $mime = (is_dir(base_path('Modules') . DIRECTORY_SEPARATOR . $path)) ? "directory" : "file";
-            }
+            $mime = $instance->getMimetype($path);
 
             if ('directory' === $mime) {
                 $that_dir = true;
