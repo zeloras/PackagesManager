@@ -292,7 +292,13 @@ abstract class CoreComponent extends MainModule
      */
     public function registerFiles()
     {
-        foreach ($this->get('files', []) as $file) {
+        try {
+            $files = $this->get('files', []);
+        } catch (\Exception $e) {
+            $files = [];
+        }
+
+        foreach ($files as $file) {
             $path = base_path($this->getPath().\DIRECTORY_SEPARATOR.$file);
             if ($this->is_exists($path, ['is_file' => true])) {
                 require $path;
@@ -312,8 +318,14 @@ abstract class CoreComponent extends MainModule
      */
     public function registerAliases()
     {
+        try {
+            $aliases = $this->get('aliases', []);
+        } catch (\Exception $e) {
+            $aliases = [];
+        }
+
         $loader = AliasLoader::getInstance();
-        foreach ($this->get('aliases', []) as $aliasName => $aliasClass) {
+        foreach ($aliases as $aliasName => $aliasClass) {
             $loader->alias($aliasName, $aliasClass);
         }
     }
