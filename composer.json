@@ -23,9 +23,7 @@
     "extra": {
         "laravel": {
             "providers": [],
-            "aliases": {
-                "Packages": "GeekCms\\PackagesManager\\Facades\\Packages"
-            }
+            "aliases": {}
         }
     },
     "autoload": {
