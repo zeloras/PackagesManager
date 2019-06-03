@@ -19,7 +19,7 @@ class MainRepository extends FileRepository
     public function __construct(Container $app, $path = null)
     {
         $this->app = $app;
-        $this->path = (!empty($path)) ? $path : base_path(ucfirst(ChildServiceProvider::PATH_MODULES).'/Settings');
+        $this->path = (!empty($path)) ? $path : base_path(ucfirst(ChildServiceProvider::PATH_MODULES));
         parent::__construct($app, $path);
     }
 

@@ -36,9 +36,9 @@ use Nwidart\Modules\Module as MainModule;
  * @method string    getModuleLogs()
  * @method string    setModuleLogs(string $name)
  * @method string    getModuleStorageInstance()
- * @method string    setModuleStorageInstance(StorageFacade $name)
+ * @method string    setModuleStorageInstance(\Storage $name)
  * @method string    getResourcesStorageInstance()
- * @method string    setResourcesStorageInstance(StorageFacade $name)
+ * @method string    setResourcesStorageInstance(\Storage $name)
  */
 abstract class CoreComponent extends MainModule
 {
@@ -164,14 +164,14 @@ abstract class CoreComponent extends MainModule
     /**
      * Storage instances for work with filesystem in module dir.
      *
-     * @var StorageFacade
+     * @var \Storage
      */
     protected $module_storage_instance;
 
     /**
      * Storage instances for work with filesystem in root/resources dir.
      *
-     * @var StorageFacade
+     * @var \Storage
      */
     protected $resources_storage_instance;
 
