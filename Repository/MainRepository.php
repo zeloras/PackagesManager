@@ -2,12 +2,27 @@
 
 namespace GeekCms\PackagesManager\Repository;
 
+use GeekCms\PackagesManager\Support\Components\ChildServiceProvider;
+use Illuminate\Container\Container;
 use Nwidart\Modules\FileRepository;
 use Nwidart\Modules\Laravel\Module;
 use Nwidart\Modules\Module as MainModule;
 
 class MainRepository extends FileRepository
 {
+    /**
+     * The constructor.
+     *
+     * @param Container   $app
+     * @param null|string $path
+     */
+    public function __construct(Container $app, $path = null)
+    {
+        $this->app = $app;
+        $this->path = (!empty($path)) ? $path : base_path(ucfirst(ChildServiceProvider::PATH_MODULES).'/Settings');
+        parent::__construct($app, $path);
+    }
+
     /**
      * Sort all downloaded modules by priority for forward init.
      *
