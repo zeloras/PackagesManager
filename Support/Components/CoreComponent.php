@@ -325,8 +325,11 @@ abstract class CoreComponent extends MainModule
         }
 
         $loader = AliasLoader::getInstance();
+
         foreach ($aliases as $aliasName => $aliasClass) {
-            $loader->alias($aliasName, $aliasClass);
+            if (!class_exists($aliasName)) {
+                $loader->alias($aliasName, $aliasClass);
+            }
         }
     }
 
