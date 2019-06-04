@@ -179,14 +179,17 @@ abstract class CoreComponent extends MainModule
      * CoreComponent constructor.
      *
      * @param Container $app
+     * @param string $name
+     * @param string $path
      *
      * @throws \Exception
      */
-    public function __construct(Container $app)
+    public function __construct(Container $app, $name = null, $path = null)
     {
         $this->setApp($app);
         $this->loadCoreComponents();
-        $this->initVariables();
+        $this->initVariables($name, $path);
+
         parent::__construct($app, $this->getName(), $this->getModulePath());
         parent::fireEvent('constructor');
     }
@@ -235,7 +238,13 @@ abstract class CoreComponent extends MainModule
     public function boot()
     {
         $this->loadCoreComponents();
-        $this->initVariables();
+        $this->initVariables($this->getName(), $this->getPath());
+
+        $this->registerConfig();
+        $this->registerFiles();
+        $this->registerAliases();
+        $this->registerProviders();
+        $this->registerFacades();
 
         $this->registerTranslations();
         $this->registerRoutes();
@@ -252,16 +261,21 @@ abstract class CoreComponent extends MainModule
      */
     public function register()
     {
-
         $this->loadCoreComponents();
-        $this->initVariables();
+        $this->initVariables($this->getName(), $this->getPath());
 
         $this->registerConfig();
         $this->registerFiles();
-        $this->registerProviders();
         $this->registerAliases();
+        $this->registerProviders();
         $this->registerFacades();
 
+        $this->registerTranslations();
+        $this->registerRoutes();
+        $this->registerFactories();
+        $this->registerMigrations();
+        $this->registerBladeDirective();
+        $this->registerViews();
         $this->registerNavigation();
         parent::fireEvent('register');
     }
@@ -334,7 +348,6 @@ abstract class CoreComponent extends MainModule
         }
 
         $loader = AliasLoader::getInstance();
-
         foreach ($aliases as $aliasName => $aliasClass) {
             if (!class_exists($aliasName)) {
                 $loader->alias($aliasName, $aliasClass);
@@ -355,6 +368,7 @@ abstract class CoreComponent extends MainModule
     public function registerTranslations()
     {
         $langModulePath = $this->getModulePath().self::$components_path['module_lang'];
+
         if ($this->is_exists(self::$components_path['module_lang'])) {
             $this->loadTranslationsFrom($langModulePath, $this->getPrefix().$this->getName());
         }
@@ -490,18 +504,24 @@ abstract class CoreComponent extends MainModule
     /**
      * Init main module data, like a name or root path.
      *
+     * @param string $name
+     * @param string $path
      * @throws \Exception
      */
-    protected function initVariables()
+    protected function initVariables($name = null, $path = null)
     {
         try {
-            preg_match_all('/([^\\\]+\\\){1}(?<module>.*?)\\\/ims', static::class, $module_names);
+            if (empty($name) && empty($path)) {
+                preg_match_all('/([^\\\]+\\\){1}(?<module>.*?)\\\/ims', static::class, $module_names);
+            } else {
+                preg_match_all('/(?<module>'.$name.')$/ims', $path, $module_names);
+            }
+
             $this->setNamespaceName((isset($module_names['module'][0])) ? $module_names['module'][0] : $this->getNamespaceName());
-            $this->setName(strtolower($this->getNamespaceName()));
             $this->setPath($this->getModuleStorageInstance()->path($this->getNamespaceName()).\DIRECTORY_SEPARATOR);
+            $this->setName(strtolower($this->getNamespaceName()));
             $this->setModulePath($this->getPath());
             $this->setNavname($this->getPrefix().$this->getName().'::admin/sidenav.name');
-
         } catch (\Exception $e) {
             $this->getModuleLogs()->error($e);
 
