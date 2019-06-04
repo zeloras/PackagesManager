@@ -5,7 +5,7 @@ namespace GeekCms\PackagesManager\Repository;
 use GeekCms\PackagesManager\Support\Components\ChildServiceProvider;
 use Illuminate\Container\Container;
 use Nwidart\Modules\FileRepository;
-use Nwidart\Modules\Laravel\Module;
+use GeekCms\PackagesManager\Modules\Module;
 use Nwidart\Modules\Module as MainModule;
 
 class MainRepository extends FileRepository
@@ -48,12 +48,11 @@ class MainRepository extends FileRepository
                     $namespace = preg_replace('/\\\$/ims', '', $find['module'][0]);
                 }
             }
-
             return $namespace;
         };
 
         // Sort array by load "weight"
-        uasort($modules, function (MainModule $a, MainModule $b) use ($sorted_list, $trims) {
+        uasort($modules, function ($a, $b) use ($sorted_list, $trims) {
             $amin = $bmin = 0;
             if (!empty($sorted_list)) {
                 $left_path = $trims($a->get('providers', [null])[0], 2);
@@ -84,7 +83,7 @@ class MainRepository extends FileRepository
      */
     public function listByPriority()
     {
-        $local_modules = $this->allEnabled();
+        $local_modules = \Module::allEnabled();
 
         $sorted = $this->sortModulesListPriority($local_modules);
         $preload_modules = [];
@@ -92,6 +91,7 @@ class MainRepository extends FileRepository
 
         foreach ($sorted as $key => $module) {
             $requirements = $module->getRequires();
+
             foreach ($requirements as $item) {
                 if (isset($preload_modules[$item])) {
                     continue;

@@ -2,6 +2,8 @@
 
 namespace GeekCms\PackagesManager\Support\Components;
 
+use Illuminate\Foundation\AliasLoader;
+
 /**
  * Class ChildServiceProvider.
  */
@@ -28,6 +30,7 @@ class ChildServiceProvider extends CoreComponent
          * Try load and set alias for "light" version, light version it's like a helper.
          */
         $config = $this->getModuleConfig();
+        $loader = AliasLoader::getInstance();
         if (isset($config['FacadeName']['alias']) && \is_array($config['FacadeName'])) {
             try {
                 $path = base_path(ucfirst(self::PATH_MODULES));
@@ -41,12 +44,18 @@ class ChildServiceProvider extends CoreComponent
                             return (new $repoClass())::getInstance();
                         });
                         $this->app->instance(\get_class(new $repoClass()), $repoClass::getInstance());
+                        $loader->alias($facadeClass, $aliasName);
                         class_alias($facadeClass, $aliasName);
                     } else {
+
                         $this->app->bind($aliasName, function ($app) use ($repoClass, $path) {
                             return new $repoClass($app, $path);
                         });
-                        $this->app->instance(\get_class(new $repoClass($this->getApp(), $path)), new $repoClass($this->getApp(), $path));
+
+                        $this->app->singleton($aliasName, function ($app) use ($repoClass, $path) {
+                            return new $repoClass($app, $path);
+                        });
+                        $loader->alias($facadeClass, $aliasName);
                         class_alias($facadeClass, $aliasName);
                     }
                 }
