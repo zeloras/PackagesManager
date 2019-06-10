@@ -47,7 +47,6 @@ class ChildServiceProvider extends CoreComponent
                         $loader->alias($facadeClass, $aliasName);
                         class_alias($facadeClass, $aliasName);
                     } else {
-
                         $this->app->bind($aliasName, function ($app) use ($repoClass, $path) {
                             return new $repoClass($app, $path);
                         });

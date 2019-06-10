@@ -1,4 +1,5 @@
 <?php
+
 namespace GeekCms\PackagesManager\Modules;
 
 use GeekCms\PackagesManager\Support\Components\ChildServiceProvider;
@@ -14,7 +15,7 @@ class Module extends ChildServiceProvider
      */
     public function getCachedServicesPath()
     {
-        return Str::replaceLast('services.php', $this->getSnakeName() . '_module.php', $this->app->getCachedServicesPath());
+        return Str::replaceLast('services.php', $this->getSnakeName().'_module.php', $this->app->getCachedServicesPath());
     }
 
     /**
@@ -23,7 +24,8 @@ class Module extends ChildServiceProvider
     public function registerProviders()
     {
         (new ProviderRepository($this->app, new Filesystem(), $this->getCachedServicesPath()))
-            ->load($this->get('providers', []));
+            ->load($this->get('providers', []))
+        ;
     }
 
     /**

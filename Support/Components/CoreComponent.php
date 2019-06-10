@@ -179,8 +179,8 @@ abstract class CoreComponent extends MainModule
      * CoreComponent constructor.
      *
      * @param Container $app
-     * @param string $name
-     * @param string $path
+     * @param string    $name
+     * @param string    $path
      *
      * @throws \Exception
      */
@@ -506,6 +506,7 @@ abstract class CoreComponent extends MainModule
      *
      * @param string $name
      * @param string $path
+     *
      * @throws \Exception
      */
     protected function initVariables($name = null, $path = null)
