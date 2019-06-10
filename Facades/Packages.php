@@ -2,7 +2,6 @@
 
 namespace GeekCms\PackagesManager\Facades;
 
-use GeekCms\PackagesManager\Repository\MainRepository;
 use GeekCms\PackagesManager\Support\Components\CoreComponent;
 use Illuminate\Support\Facades\Facade;
 
@@ -20,7 +19,7 @@ class Packages extends Facade
         $settings = \Config::get('module_'.strtolower($module_name), null);
 
         if (empty($settings)) {
-            $module_config = module_path($module_name) . DIRECTORY_SEPARATOR . CoreComponent::CONFIG_PATH;
+            $module_config = module_path($module_name).\DIRECTORY_SEPARATOR.CoreComponent::CONFIG_PATH;
             if (file_exists($module_config) && is_file($module_config)) {
                 $settings = require $module_config;
             }

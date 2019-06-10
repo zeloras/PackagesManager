@@ -2,11 +2,10 @@
 
 namespace GeekCms\PackagesManager\Repository;
 
+use GeekCms\PackagesManager\Modules\Module;
 use GeekCms\PackagesManager\Support\Components\ChildServiceProvider;
 use Illuminate\Container\Container;
 use Nwidart\Modules\FileRepository;
-use GeekCms\PackagesManager\Modules\Module;
-use Nwidart\Modules\Module as MainModule;
 
 class MainRepository extends FileRepository
 {
@@ -48,6 +47,7 @@ class MainRepository extends FileRepository
                     $namespace = preg_replace('/\\\$/ims', '', $find['module'][0]);
                 }
             }
+
             return $namespace;
         };
 
