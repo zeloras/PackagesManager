@@ -281,6 +281,16 @@ abstract class CoreComponent extends MainModule
     }
 
     /**
+     * Get menu data.
+     *
+     * @return string
+     */
+    public function getMenu()
+    {
+        return $this->get('menu_sidebar', null);
+    }
+
+    /**
      * Registration module config.
      *
      * @throws \Exception
@@ -522,7 +532,7 @@ abstract class CoreComponent extends MainModule
             $this->setPath($this->getModuleStorageInstance()->path($this->getNamespaceName()).\DIRECTORY_SEPARATOR);
             $this->setName(strtolower($this->getNamespaceName()));
             $this->setModulePath($this->getPath());
-            $this->setNavname($this->getPrefix().$this->getName().'::admin/sidenav.name');
+            $this->setNavname($this->getPrefix().$this->getName().'::');
         } catch (\Exception $e) {
             $this->getModuleLogs()->error($e);
 

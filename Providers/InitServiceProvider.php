@@ -22,21 +22,6 @@ class InitServiceProvider extends MainServiceProvider
             ]);
         });
 
-        if ($adminSidenav = \Menu::instance('admin.sidenav')) {
-            $adminSidenav->dropdown(
-                $this->getNavname(),
-                function ($sub) {
-                    $sub->route($this->getAdminRoutePrefix().'packages', $this->getPrefix().$this->getName().'::admin/sidenav.installed', null, [
-                        'icon' => 'font-icon font-icon-archive',
-                    ]);
-
-                    $sub->route($this->getAdminRoutePrefix().'packages.list', $this->getPrefix().$this->getName().'::admin/sidenav.lists', null, [
-                        'icon' => 'font-icon font-icon-earth-bordered',
-                    ]);
-                },
-                null,
-                ['icon' => 'font-icon font-icon-github']
-            );
-        }
+        parent::registerNavigation();
     }
 }

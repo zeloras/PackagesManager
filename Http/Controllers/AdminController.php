@@ -13,8 +13,9 @@ class AdminController extends Controller
     /**
      * Main route with installed packages.
      *
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      * @throws \Nwidart\Modules\Exceptions\ModuleNotFoundException
+     *
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
     public function index()
     {
@@ -22,7 +23,7 @@ class AdminController extends Controller
         $list = $main->getOfficialPackages();
 
         return view('packagesmanager::admin/index', [
-            'list' => $list
+            'list' => $list,
         ]);
     }
 
@@ -34,7 +35,7 @@ class AdminController extends Controller
     public function list()
     {
         return view('packagesmanager::admin/list', [
-            'list' => []
+            'list' => [],
         ]);
     }
 }
