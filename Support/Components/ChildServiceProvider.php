@@ -17,13 +17,13 @@ class ChildServiceProvider extends CoreComponent
         $menu = $this->getMenu();
 
         if ($adminSidenav = \Menu::instance('admin.sidenav')) {
-            if ($menu && count($menu)) {
+            if ($menu && \count($menu)) {
                 foreach ($menu as $menu_item) {
                     $route = (!empty($menu_item['route'])) ? $menu_item['route'] : $this->getName();
                     $icon = (!empty($menu_item['icon'])) ? $menu_item['icon'] : 'fa fa-fw fa-comments-o';
                     $name = (!empty($menu_item['i18n_name'])) ? $menu_item['i18n_name'] : 'admin/sidenav.name';
 
-                    if (isset($menu_item['child']) && count($menu_item['child'])) {
+                    if (isset($menu_item['child']) && \count($menu_item['child'])) {
                         $adminSidenav->dropdown(
                             $this->getNavname().$name,
                             function ($sub) use ($menu_item) {
