@@ -6,6 +6,15 @@ var adminMainComponent = {
             'lowercase': true,
             'replacements': {},
             'transliterate': true
+        },
+        'template_clone_config': {
+            'template': null,
+            'template_in_class': null,
+            'insert': null,
+            'data': [],
+            'bind': null,
+            'callback': null,
+            'input_group': 'input_group'
         }
     },
 
@@ -31,6 +40,7 @@ var adminMainComponent = {
      * @param cb
      */
     toggleFormGroup: function (element, rules, cb) {
+        let self = adminMainComponent;
         let selected_type = $(element).val();
         rules = rules || {};
 
@@ -47,27 +57,7 @@ var adminMainComponent = {
                     $(rules[type].on).attr('required', 'true');
                 }
 
-                if (typeof cb == "function" || typeof cb == "string" && cb.length) {
-                    if (typeof cb == "string") {
-                        let called = window;
-                        let can_call = true;
-                        let try_split = cb.split('.');
-
-                        for (let part in try_split) {
-                            if (called.hasOwnProperty(try_split[part])) {
-                                called = called[try_split[part]];
-                            } else {
-                                can_call = false;
-                            }
-                        }
-
-                        if (can_call) {
-                            called($(element), type);
-                        }
-                    } else {
-                        cb($(element), type);
-                    }
-                }
+                self.parseCallbackString(cb)($(element), type);
 
                 break;
             } else {
@@ -262,7 +252,151 @@ var adminMainComponent = {
         text = text.replace(RegExp('(^' + configure.delimiter + '|' + configure.delimiter + '$)', 'g'), '');
 
         return configure.lowercase ? text.toLowerCase() : text;
-    }
+    },
+
+    appendTemplate: function (...args) {
+        let self = adminMainComponent;
+        let config = self.config;
+        let settings = config.template_clone_config;
+        let arguments_list = (args.hasOwnProperty(0)) ? args[0] : {};
+        let replaceFunc = function (template, arr, key) {
+            let value = arr[key];
+            let name = (/^\_/.test(key)) ? '%' + key.replace(/^\_/, '') + '%' : '\\%data\\.' + key + '\\%';
+            value = (typeof value === "array" || typeof value === "object") ? JSON.stringify(value) : value;
+
+            if (/^is\.data\./.test(key)) {
+                name = '\\%' + key + '\\%';
+                value = (value) ? "checked='checked'" : "";
+            }
+
+            template = template.replace(new RegExp(name, 'igm'), value);
+
+            return template;
+        };
+
+        /**
+         * For reinit settings
+         */
+        for (let config_key in settings) {
+            if (arguments_list.hasOwnProperty(config_key)) {
+                settings[config_key] = arguments_list[config_key];
+            }
+        }
+
+        if (settings.template && settings.insert) {
+            if (settings.data && Array.isArray(settings.data)) {
+                let template_block = $(settings.template);
+                let template_in = settings.template_in_class || settings.template;
+
+                if (template_block.length) {
+                    let template_clone = $(template_block[0].content).find(template_in).clone();
+                    let template_item = template_clone.data('elements');
+
+                    for (let arr of settings.data) {
+                        let template = template_clone.html();
+                        let arr_list = {};
+                        arr['_input_group'] = settings.input_group;
+                        arr['_id'] = (Number(arr['id']) === 0) ? self.countCloneGroups($(settings.insert), template_item) : arr['id'];
+                        template = replaceFunc(template, arr, '_id');
+
+                        for (let key in arr) {
+                            if (!/^_/.test(key)) {
+                                arr_list['is.data.' + key] = arr[key];
+                            }
+
+                            arr_list[key] = arr[key];
+                        }
+
+                        for (let key in arr_list) {
+                            template = replaceFunc(template, arr_list, key);
+                        }
+
+                        $(settings.insert).prepend(template);
+                    }
+                } else {
+                    console.error('Dosent find template block')
+                }
+            } else {
+                console.error('Dosent set data or data dosent array')
+            }
+        } else {
+            console.error('Dosent set settings for template or insert block');
+        }
+        //self.parseCallbackString(cb)($(element), type);
+    },
+
+    /**
+     * Function for parse and try call string as function
+     *
+     * @param callback
+     * @param call
+     * @return {function(): null}
+     */
+    parseCallbackString: function (callback, call) {
+        let callback_function = function () {return null};
+        call = call || false;
+
+        if (typeof callback == "function" || typeof callback == "string" && callback.length) {
+            callback_function = callback;
+
+            if (typeof callback !== "function") {
+                let called = window;
+                let can_call = true;
+                let try_split = callback.split('.');
+
+                for (let part in try_split) {
+                    if (called.hasOwnProperty(try_split[part])) {
+                        called = called[try_split[part]];
+                    } else {
+                        can_call = false;
+                    }
+                }
+
+                if (can_call) {
+                    callback_function = called;
+                }
+            }
+        }
+
+        return (call) ? callback_function() : callback_function;
+    },
+
+    /**
+     * Find available id for formname
+     *
+     * @param clone_list Class with cloned items block
+     * @param clone_item Class item block
+     * @returns {number}
+     */
+    countCloneGroups: function (clone_list, clone_item) {
+        clone_item = clone_item || false;
+        let container = $(clone_list);
+        let regexp = new RegExp('\\[(\\d+)\\]', 'is');
+        let items = (clone_item) ? container.find(clone_item) : {};
+        let counts = [];
+        let id = 0;
+        let findByName = '';
+
+        if (clone_item) {
+            items.each(function () {
+                let item = $(this).find('input:eq(0)').attr('name');
+                let cnt = item.match(regexp);
+                counts.push(Number(cnt[1]));
+                findByName = item;
+            });
+
+            for (let count_item of counts) {
+                let nameFind = findByName.replace(regexp, '[' + Number(count_item + 1) + ']');
+
+                if (container.find('input' + nameFind).length < 1) {
+                    id = Number(count_item + 1);
+                }
+            }
+        }
+
+        return id;
+    },
+
 };
 
 adminMainComponent.init();

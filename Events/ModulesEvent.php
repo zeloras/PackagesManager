@@ -2,9 +2,9 @@
 
 namespace GeekCms\PackagesManager\Events;
 
-use GeekCms\PackagesManager\Models\Modules;
 use App\Events\Event;
 use App\Models\User;
+use GeekCms\PackagesManager\Models\Modules;
 
 /**
  * Class ModulesEvent.
@@ -14,7 +14,7 @@ class ModulesEvent extends Event
     /**
      * ModulesEvent constructor.
      *
-     * @param Modules   $model
+     * @param Modules     $model
      * @param User        $user
      * @param null|string $type
      */
