@@ -22,6 +22,24 @@
         "geekcms"
     ],
     "packages-tag": "geekcms-module",
+    "access_permissions": [
+        {
+            "name": "modules_packagesmanager_admin_list",
+            "i18n_name": "access.modules_packagesmanager_admin_list"
+        },
+        {
+            "name": "modules_packagesmanager_admin_disable",
+            "i18n_name": "access.modules_packagesmanager_admin_disable"
+        },
+        {
+            "name": "modules_packagesmanager_admin_remove",
+            "i18n_name": "access.modules_packagesmanager_admin_remove"
+        },
+        {
+            "name": "modules_packagesmanager_admin_install",
+            "i18n_name": "access.modules_packagesmanager_admin_install"
+        }
+    ],
     "menu_sidebar": [{
         "i18n_name": null,
         "route": null,
