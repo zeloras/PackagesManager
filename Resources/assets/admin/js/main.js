@@ -57,7 +57,7 @@ var adminMainComponent = {
                     $(rules[type].on).attr('required', 'true');
                 }
 
-                self.parseCallbackString(cb)($(element), type);
+                self.parseCallbackString(cb, false, [$(element), type]);
 
                 break;
             } else {
@@ -239,7 +239,7 @@ var adminMainComponent = {
         }
 
         // Replace non-alphanumeric characters with our delimiter
-        let clear_symbl = (xregexp) ? RegExp('[^a-z0-9]+', 'ig') : XRegExp('[^\\p{L}\\p{N}]+', 'ig');
+        let clear_symbl = (xregexp) ? RegExp('[^a-z0-9\\/]+', 'ig') : XRegExp('[^\\p{L}\\p{N}]+', 'ig');
         text = text.replace(clear_symbl, configure.delimiter);
 
         // Remove duplicate delimiters
@@ -264,7 +264,13 @@ var adminMainComponent = {
             let name = (/^\_/.test(key)) ? '%' + key.replace(/^\_/, '') + '%' : '\\%data\\.' + key + '\\%';
             value = (typeof value === "array" || typeof value === "object") ? JSON.stringify(value) : value;
 
-            if (/^is\.data\./.test(key)) {
+            if (arr.hasOwnProperty('is.data.main') && arr['is.data.main'] && /^is\.data\./.test(key) && !/^is\.data\.main/.test(key)) {
+                name = '\\%' + key + '\\%';
+                value = (value) ? "disabled='disabled' checked='checked'" : "disabled='disabled'";
+            } else if (/^is\.data\.main/.test(key)) {
+                name = '\\%' + key + '\\%';
+                value = (value) ? "main_block" : "";
+            } else if (/^is\.data\./.test(key) && !/^is\.data\.main/.test(key)) {
                 name = '\\%' + key + '\\%';
                 value = (value) ? "checked='checked'" : "";
             }
@@ -311,7 +317,7 @@ var adminMainComponent = {
                             template = replaceFunc(template, arr_list, key);
                         }
 
-                        $(settings.insert).prepend(template);
+                        $(settings.insert).append(template);
                     }
                 } else {
                     console.error('Dosent find template block')
@@ -330,17 +336,19 @@ var adminMainComponent = {
      *
      * @param callback
      * @param call
-     * @return {function(): null}
+     * @param args
+     * @return {(function(): null)|*}
      */
-    parseCallbackString: function (callback, call) {
+    parseCallbackString: function (callback, call, ...args) {
         let callback_function = function () {return null};
+        let arguments_list = args;
+        let called = window;
         call = call || false;
 
         if (typeof callback == "function" || typeof callback == "string" && callback.length) {
             callback_function = callback;
 
             if (typeof callback !== "function") {
-                let called = window;
                 let can_call = true;
                 let try_split = callback.split('.');
 
@@ -358,7 +366,11 @@ var adminMainComponent = {
             }
         }
 
-        return (call) ? callback_function() : callback_function;
+        if (arguments_list.length) {
+            return callback_function.apply(null, ...arguments_list);
+        } else {
+            return (call) ? callback_function() : callback_function;
+        }
     },
 
     /**

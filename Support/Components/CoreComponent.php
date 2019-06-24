@@ -6,6 +6,7 @@ use BadMethodCallException;
 use Illuminate\Container\Container;
 use Illuminate\Database\Eloquent\Factory;
 use Illuminate\Foundation\AliasLoader;
+use Illuminate\Support\Facades\Validator;
 use Nwidart\Modules\Module as MainModule;
 
 /**
@@ -152,6 +153,7 @@ abstract class CoreComponent extends MainModule
         'module_view' => 'Resources/views',
         'module_factories' => 'Database/factories',
         'module_migrations' => 'Database/Migrations',
+        'rules_map' => 'Models\\Validators\\Rules'
     ];
 
     /**
@@ -252,6 +254,7 @@ abstract class CoreComponent extends MainModule
         $this->registerMigrations();
         $this->registerBladeDirective();
         $this->registerViews();
+        $this->registerValidationRules();
 
         parent::fireEvent('boot');
     }
@@ -277,6 +280,7 @@ abstract class CoreComponent extends MainModule
         $this->registerBladeDirective();
         $this->registerViews();
         $this->registerNavigation();
+        $this->registerValidationRules();
         parent::fireEvent('register');
     }
 
@@ -537,6 +541,22 @@ abstract class CoreComponent extends MainModule
             $this->getModuleLogs()->error($e);
 
             throw new \Exception($e);
+        }
+    }
+
+    /**
+     * Register validation rules
+     */
+    protected function registerValidationRules()
+    {
+        $basenamespace = ucfirst(self::PATH_MODULES).'\\'.$this->getNamespaceName() . '\\' . self::$components_path['rules_map'];
+
+        if (class_exists($basenamespace)) {
+
+            Validator::resolver(function($translator, $data, $rules, $messages) use ($basenamespace)
+            {
+                return new $basenamespace($translator, $data, $rules, $messages);
+            });
         }
     }
 
