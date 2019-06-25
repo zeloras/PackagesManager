@@ -15,9 +15,11 @@ class ModulesEvent extends Event
 {
     /**
      * ModulesEvent constructor.
+     *
      * @param Modules $model
-     * @param User $user
-     * @param null $type
+     * @param User    $user
+     * @param null    $type
+     *
      * @throws \Throwable
      */
     public function __construct(Modules $model, User $user, $type = null)
@@ -27,7 +29,7 @@ class ModulesEvent extends Event
     }
 
     /**
-     * Method for check new permission roles and update permission table
+     * Method for check new permission roles and update permission table.
      *
      * @throws \Throwable
      */
@@ -45,7 +47,7 @@ class ModulesEvent extends Event
                     'name' => $col,
                     'guard_name' => 'web',
                     'created_at' => $current_time,
-                    'updated_at' => $current_time
+                    'updated_at' => $current_time,
                 ];
             }
 
@@ -53,13 +55,12 @@ class ModulesEvent extends Event
         }, $permissions);
 
         \DB::transaction(function () use ($permissions_list, $prepared_insert) {
-
             $permissions_list = array_unique($permissions_list);
             $permissions_old = Permission::whereIn('name', $permissions_list)->get();
 
-            if (!count($permissions_old)) {
+            if (!\count($permissions_old)) {
                 Permission::query()->insert($prepared_insert);
-            } elseif (count($permissions_old) !== count($permissions_list)) {
+            } elseif (\count($permissions_old) !== \count($permissions_list)) {
                 foreach ($permissions_old as $arr_old) {
                     unset($prepared_insert[$arr_old->name]);
                 }

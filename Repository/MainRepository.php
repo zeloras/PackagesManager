@@ -137,7 +137,7 @@ class MainRepository extends FileRepository
     }
 
     /**
-     * Get list with permissions for every enabled module
+     * Get list with permissions for every enabled module.
      *
      * @return array
      */
