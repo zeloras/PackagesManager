@@ -153,7 +153,7 @@ abstract class CoreComponent extends MainModule
         'module_view' => 'Resources/views',
         'module_factories' => 'Database/factories',
         'module_migrations' => 'Database/Migrations',
-        'rules_map' => 'Models\\Validators\\Rules'
+        'rules_map' => 'Models\\Validators\\Rules',
     ];
 
     /**
@@ -545,16 +545,14 @@ abstract class CoreComponent extends MainModule
     }
 
     /**
-     * Register validation rules
+     * Register validation rules.
      */
     protected function registerValidationRules()
     {
-        $basenamespace = ucfirst(self::PATH_MODULES).'\\'.$this->getNamespaceName() . '\\' . self::$components_path['rules_map'];
+        $basenamespace = ucfirst(self::PATH_MODULES).'\\'.$this->getNamespaceName().'\\'.self::$components_path['rules_map'];
 
         if (class_exists($basenamespace)) {
-
-            Validator::resolver(function($translator, $data, $rules, $messages) use ($basenamespace)
-            {
+            Validator::resolver(function ($translator, $data, $rules, $messages) use ($basenamespace) {
                 return new $basenamespace($translator, $data, $rules, $messages);
             });
         }
