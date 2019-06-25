@@ -137,6 +137,22 @@ class MainRepository extends FileRepository
     }
 
     /**
+     * Get list with permissions for every enabled module
+     *
+     * @return array
+     */
+    public function getPermissionsList()
+    {
+        $local_modules = \Module::allEnabled();
+        $permissions = [];
+        foreach ($local_modules as $module) {
+            $permissions[$module->name] = $module->get('access_permissions', []);
+        }
+
+        return $permissions;
+    }
+
+    /**
      * {@inheritdoc}
      */
     protected function createModule(...$args)
