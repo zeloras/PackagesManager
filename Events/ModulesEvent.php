@@ -6,6 +6,7 @@ use App\Events\Event;
 use App\Models\User;
 use Carbon\Carbon;
 use GeekCms\PackagesManager\Models\Modules;
+use Illuminate\Support\Facades\Schema;
 use Spatie\Permission\Models\Permission;
 
 /**
@@ -35,6 +36,11 @@ class ModulesEvent extends Event
      */
     public static function checkAndUpdatePermissions()
     {
+        if (!Schema::hasTable('permissions')) {
+            return false;
+        }
+
+        $main_user = User::first();
         $permissions = \Packages::getPermissionsList();
         $permissions_list = $prepared_insert = [];
         $current_time = Carbon::now();
@@ -54,12 +60,16 @@ class ModulesEvent extends Event
             return null;
         }, $permissions);
 
-        \DB::transaction(function () use ($permissions_list, $prepared_insert) {
+        \DB::transaction(function () use ($permissions_list, $prepared_insert, $main_user) {
             $permissions_list = array_unique($permissions_list);
             $permissions_old = Permission::whereIn('name', $permissions_list)->get();
 
             if (!\count($permissions_old)) {
                 Permission::query()->insert($prepared_insert);
+                if ($main_user->checkPermissionTo('admin_access')) {
+                    $permissions_list = array_keys($prepared_insert);
+                    $main_user->syncPermissions($permissions_list);
+                }
             } elseif (\count($permissions_old) !== \count($permissions_list)) {
                 foreach ($permissions_old as $arr_old) {
                     unset($prepared_insert[$arr_old->name]);
