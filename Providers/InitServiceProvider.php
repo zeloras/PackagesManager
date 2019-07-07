@@ -3,7 +3,7 @@
 namespace GeekCms\PackagesManager\Providers;
 
 use GeekCms\PackagesManager\Support\ServiceProvider as MainServiceProvider;
-use Modules\Menu\Libs\Admin\AdminSidenav;
+use GeekCms\Menu\Libs\Admin\AdminSidenav;
 
 /**
  * Class InitServiceProvider.
