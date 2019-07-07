@@ -2,16 +2,16 @@
     <thead>
     <tr>
         <th class="table-title">
-            {{ \Translate::get('pages::admin/main.list.title') }}
+            {{ \Translate::get('module_pages::admin/main.list.title') }}
         </th>
         <th>
-            {{ \Translate::get('pages::admin/main.list.languages') }}
+            {{ \Translate::get('module_pages::admin/main.list.languages') }}
         </th>
         <th>
-            {{ \Translate::get('pages::admin/main.list.type') }}
+            {{ \Translate::get('module_pages::admin/main.list.type') }}
         </th>
         <th>
-            {{ \Translate::get('pages::admin/main.list.updated') }}
+            {{ \Translate::get('module_pages::admin/main.list.updated') }}
         </th>
         <th class="table-icon-cell table-actions"></th>
     </tr>

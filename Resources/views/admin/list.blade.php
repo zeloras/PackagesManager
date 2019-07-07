@@ -1,6 +1,6 @@
 @extends('admin.layouts.main')
 
-@section('title', \Translate::get('packagesmanager::admin/sidenav.name'))
+@section('title', \Translate::get('module_packagesmanager::admin/sidenav.name'))
 
 @section('content')
     <section class="box-typical container">
@@ -10,7 +10,7 @@
                     <ul class="navbar-nav mr-auto d-flex flex-row">
                         <li class="nav-item">
                             <a class="nav-link active" href="{{ route('admin.packages') }}">
-                                {{ \Translate::get('packagesmanager::admin/main.packages_list') }}
+                                {{ \Translate::get('module_packagesmanager::admin/main.packages_list') }}
                             </a>
                         </li>
                     </ul>
@@ -23,7 +23,7 @@
         <header class="box-typical-header">
             <div class="tbl-row">
                 <div class="tbl-cell tbl-cell-title">
-                    <h3>{{ \Translate::get('packagesmanager::admin/main.installed_packages') }}</h3>
+                    <h3>{{ \Translate::get('module_packagesmanager::admin/main.installed_packages') }}</h3>
                 </div>
             </div>
         </header>
