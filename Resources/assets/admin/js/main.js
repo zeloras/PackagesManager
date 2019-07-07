@@ -1,3 +1,5 @@
+var storageKey = 'holdTimeoutStorage';
+
 var adminMainComponent = {
     config: {
         'slug_settings': {
@@ -409,6 +411,98 @@ var adminMainComponent = {
         return id;
     },
 
+    /**
+     * Hold time
+     *
+     * @param alias
+     * @param fn
+     * @param time
+     */
+    holdTimeout: function (alias, fn, time) {
+        let self = adminMainComponent;
+        function _clear() {
+            clearInterval(window[storageKey][alias]);
+            window[storageKey][alias] = false;
+        }
+
+        if (!self.getObjectValue(window, storageKey)) {
+            window[storageKey] = {};
+        }
+
+        _clear();
+
+        if (!self.getObjectValue(window[storageKey], alias)) {
+            window[storageKey][alias] = setTimeout(function () {
+                fn();
+                _clear();
+            }, time);
+        }
+    },
+
+    /**
+     * Get value from object by key
+     *
+     * @param obj
+     * @param key
+     * @param defaultValue
+     * @return {*}
+     */
+    getObjectValue: function (obj, key, defaultValue) {
+        let self = adminMainComponent;
+        defaultValue = defaultValue || null;
+
+        if (typeof obj === 'undefined') {
+            return defaultValue;
+        }
+
+        let _index = key.indexOf('.');
+
+        if (_index > -1) {
+            return self.getObjectValue(
+                obj[key.substring(0, _index)],
+                key.substr(_index + 1),
+                defaultValue
+            );
+        }
+
+        return obj[key] || defaultValue;
+    },
+
+    /**
+     * Fill values to form by element
+     *
+     * @param element
+     * @param value
+     */
+    setFormElementValue: function (element, value) {
+        let tag = element.prop('tagName');
+        let tagType = element.attr('type');
+
+
+        // type=text
+        if (element.is('input')) {
+            let type = element.attr('type');
+            if (type == 'text' || type == 'number' || type == 'hidden') {
+                element.val(value);
+            }
+        }
+
+        // type=checkbox
+        if (element.is('input') && element.attr('type') == 'checkbox') {
+            element.prop('checked', (value == "1") ? true : false);
+        }
+
+        // type=textarea
+        if (element.is('textarea')) {
+            element.val(value);
+        }
+
+        // type=select
+        if (element.is('select')) {
+            element.find('option[value="' + value + '"]').attr('selected', true);
+            element.trigger('change');
+        }
+    }
 };
 
 adminMainComponent.init();
