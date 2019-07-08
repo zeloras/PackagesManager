@@ -2,7 +2,7 @@
 
 namespace GeekCms\PackagesManager\Repository\Template;
 
-use GeekCms\PackagesManager\Repository\LocalRepository;
+use GeekCms\PackagesManager\Repository\LocalPackage;
 use GeekCms\PackagesManager\Repository\MainRepository;
 use GeekCms\PackagesManager\Repository\RemoteRepository;
 use Illuminate\Container\Container;
@@ -30,7 +30,7 @@ abstract class MainRepositoryAbstract extends ModuleRepository
      *
      * @var string
      */
-    protected $packages_local = LocalRepository::class;
+    protected $packages_local = LocalPackage::class;
     protected $packages_remote = RemoteRepository::class;
 
     /**
@@ -65,23 +65,24 @@ abstract class MainRepositoryAbstract extends ModuleRepository
      *
      * @throws \Nwidart\Modules\Exceptions\ModuleNotFoundException
      *
-     * @return mixed
+     * @return LocalPackage
      */
     public function getOfficialPackages()
     {
-        return [];
+        return $this->modules[self::PACKAGE_OFFICIAL];
     }
+
 
     /**
      * Get unofficial packages list.
      *
      * @throws \Nwidart\Modules\Exceptions\ModuleNotFoundException
      *
-     * @return mixed
+     * @return LocalPackage
      */
     public function getUnofficialPackages()
     {
-        return [];
+        return $this->modules[self::PACKAGE_UNOFFICIAL];
     }
 
     /**
@@ -92,6 +93,16 @@ abstract class MainRepositoryAbstract extends ModuleRepository
     public function setMain()
     {
         return $this->main_instance;
+    }
+
+    /**
+     * Switch to main class.
+     *
+     * @return MainRepository
+     */
+    public function getHandler()
+    {
+        return $this->packages_local;
     }
 
     /**

@@ -3,27 +3,27 @@
 @section('title', \Translate::get('module_packagesmanager::admin/sidenav.name'))
 
 @section('content')
-    <section class="box-typical container">
+    {{--<section class="box-typical container">
         <header class="box-typical-header">
             <div class="tbl-row">
                 <div class="tbl-cell tbl-cell-title">
                     <ul class="navbar-nav mr-auto d-flex flex-row">
                         <li class="nav-item">
-                            <a class="nav-link active" href="{{ route('admin.packages') }}">
-                                {{ \Translate::get('module_packagesmanager::admin/main.packages_list') }}
+                            <a class="nav-link" href="{{ route('admin.packages.list') }}">
+                                {{ \Translate::get('module_packagesmanager::admin/main.installed_packages') }}
                             </a>
                         </li>
                     </ul>
                 </div>
             </div>
         </header>
-    </section>
+    </section>--}}
 
     <section class="box-typical container pb-3">
         <header class="box-typical-header">
             <div class="tbl-row">
                 <div class="tbl-cell tbl-cell-title">
-                    <h3>{{ \Translate::get('module_packagesmanager::admin/main.installed_packages') }}</h3>
+                    <h3>{{ \Translate::get('module_packagesmanager::admin/main.packages_list') }}</h3>
                 </div>
             </div>
         </header>

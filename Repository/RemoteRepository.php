@@ -6,6 +6,8 @@ use GeekCms\PackagesManager\Repository\Template\MainRepositoryAbstract;
 
 class RemoteRepository extends MainRepositoryAbstract
 {
+    protected $cacheCheckKey = 'get_url_cached_modules';
+
     /**
      * {@inheritdoc}
      */
@@ -58,21 +60,27 @@ class RemoteRepository extends MainRepositoryAbstract
      */
     protected function getGitData($url = '')
     {
-        $headers = [
-            'Host: api.github.com',
-            'User-Agent: curl/7.52.1',
-            'Accept: */*',
-        ];
+        return \Cache::remember($this->cacheCheckKey . '_' . $url, config('cache.settings.minutes', 10), function () use ($url) {
+            try {
+                $headers = [
+                    'Host: api.github.com',
+                    'User-Agent: curl/7.52.1',
+                    'Accept: */*',
+                ];
 
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-        $result = curl_exec($ch);
-        curl_close($ch);
+                $ch = curl_init($url);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+                $result = curl_exec($ch);
+                curl_close($ch);
 
-        return json_decode($result, true);
+                return json_decode($result, true);
+            } catch (\Exception $e) {
+                return [];
+            }
+        });
     }
 
     /**
@@ -90,7 +98,7 @@ class RemoteRepository extends MainRepositoryAbstract
         if (!empty($url)) {
             $releases = $this->getGitData($url.'/releases');
 
-            if (!empty($releases)) {
+            if (!empty($releases) && !isset($releases['message'])) {
                 foreach ($releases as $release) {
                     $release_date = strtotime($release['published_at']);
                     if ($release_date > $last_release_date) {
@@ -139,6 +147,30 @@ class RemoteRepository extends MainRepositoryAbstract
     }
 
     /**
+     * Get module info by module file
+     *
+     * @param null $url
+     * @return array|mixed
+     */
+    public function getModuleInfo($url = null)
+    {
+        $info = [];
+
+        $model = $this->getGitData($url.'/contents/module.json');
+        if (isset($model['content'])) {
+            $content = base64_decode($model['content']);
+            if ($content) {
+                $content = json_decode($content, true);
+                if ($content && count($content)) {
+                    $info = $content;
+                }
+            }
+        }
+
+        return $info;
+    }
+
+    /**
      * Get official modules and all forks.
      *
      * @param array $authors
@@ -156,14 +188,20 @@ class RemoteRepository extends MainRepositoryAbstract
                 $result = $this->getGitData($author);
                 if (!empty($result)) {
                     foreach ($result as $repo) {
-                        if (preg_match('/\#'.$tag.'/', $repo['description'])) {
+                        if (isset($repo['description']) && preg_match('/\#'.$tag.'/', $repo['description'])) {
                             $release = $this->getLastRelease($repo['url'], $repo);
+                            $model_info = $this->getModuleInfo($repo['url']);
+
                             $modules[] = [
                                 'name' => $repo['name'],
+                                'vendor' => $repo['owner']['login'],
                                 'description' => $repo['description'],
                                 'release' => $release,
                                 'url' => $repo['html_url'],
                                 'forks' => ($repo['forks']) ? $repo['forks_url'] : null,
+                                'module_info' => $model_info,
+                                'installed' => false,
+                                'enabled' => false
                             ];
                         }
                     }

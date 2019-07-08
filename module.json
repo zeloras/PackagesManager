@@ -42,19 +42,8 @@
     ],
     "menu_sidebar": [{
         "i18n_name": null,
-        "route": null,
-        "icon": "font-icon font-icon-github",
-        "child": [
-            {
-                "route": "packages",
-                "i18n_name": "admin/sidenav.installed",
-                "icon": "font-icon font-icon-archive"
-            },
-            {
-                "route": "packages.list",
-                "i18n_name": "admin/sidenav.lists",
-                "icon": "font-icon font-icon-earth-bordered"
-            }
-        ]
+        "route": "packages",
+        "icon": "font-icon font-icon-github"
+
     }]
 }

@@ -19,8 +19,8 @@ class AdminController extends Controller
      */
     public function index()
     {
-        $main = Packages::setRemote();
-        $list = $main->getOfficialPackages();
+        $main = Packages::getModulesOfficial();
+        $list = $main->installed();
 
         return view('packagesmanager::admin/index', [
             'list' => $list,

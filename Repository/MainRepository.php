@@ -10,6 +10,13 @@ use Nwidart\Modules\FileRepository;
 class MainRepository extends FileRepository
 {
     /**
+     * Var with RemoteRepository instance
+     *
+     * @var null
+     */
+    protected $main_repo_app = null;
+
+    /**
      * The constructor.
      *
      * @param Container   $app
@@ -19,6 +26,7 @@ class MainRepository extends FileRepository
     {
         $this->app = $app;
         $this->path = (!empty($path)) ? $path : base_path(ucfirst(ChildServiceProvider::PATH_MODULES));
+        $this->main_repo_app = new RemoteRepository($this->app, $this->path, $this);
         parent::__construct($app, $path);
     }
 
@@ -109,23 +117,37 @@ class MainRepository extends FileRepository
     }
 
     /**
-     * Switch to local modules class.
-     *
-     * @return LocalRepository
-     */
-    public function setLocal()
-    {
-        return new LocalRepository($this->app, $this->path, $this);
-    }
-
-    /**
-     * Switch to remote modules class.
+     * Get modules instance.
      *
      * @return RemoteRepository
      */
-    public function setRemote()
+    public function getModules()
     {
-        return new RemoteRepository($this->app, $this->path, $this);
+        return $this->main_repo_app;
+    }
+
+    /**
+     * Get official modules
+     *
+     * @return LocalPackage|mixed
+     * @throws \Nwidart\Modules\Exceptions\ModuleNotFoundException
+     */
+    public function getModulesOfficial()
+    {
+        $handler = $this->main_repo_app->getHandler();
+        return new $handler($this->main_repo_app->getOfficialPackages());
+    }
+
+    /**
+     * Get unofficial modules
+     *
+     * @return LocalPackage|mixed
+     * @throws \Nwidart\Modules\Exceptions\ModuleNotFoundException
+     */
+    public function getModulesUnOfficial()
+    {
+        $handler = $this->main_repo_app->getHandler();
+        return new $handler($this->main_repo_app->getUnofficialPackages());
     }
 
     /**
