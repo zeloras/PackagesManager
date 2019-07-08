@@ -146,7 +146,7 @@ class MainRepository extends FileRepository
         $local_modules = \Module::allEnabled();
         $permissions = [];
         foreach ($local_modules as $module) {
-            $permissions[$module->name] = $module->get('access_permissions', []);
+            $permissions[$module->name] = $module->get(\Gcms::CONFIG_ADMIN_PERMISSION, []);
         }
 
         return $permissions;

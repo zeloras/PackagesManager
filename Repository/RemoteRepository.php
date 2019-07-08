@@ -79,16 +79,17 @@ class RemoteRepository extends MainRepositoryAbstract
      * Get last module version with info by repo project url.
      *
      * @param null $url
-     *
+     * @param array $repo_data
      * @return array
      */
-    protected function getLastRelease($url = null)
+    protected function getLastRelease($url = null, $repo_data = [])
     {
         $last_release_date = 0;
         $last_release = [];
 
         if (!empty($url)) {
             $releases = $this->getGitData($url.'/releases');
+
             if (!empty($releases)) {
                 foreach ($releases as $release) {
                     $release_date = strtotime($release['published_at']);
@@ -103,6 +104,14 @@ class RemoteRepository extends MainRepositoryAbstract
                         ];
                     }
                 }
+            } else {
+                $last_release = [
+                    'name' => $repo_data['default_branch'],
+                    'version' => 0,
+                    'download' => $repo_data['url'] . DIRECTORY_SEPARATOR . 'zipball',
+                    'date' => strtotime($repo_data['updated_at']),
+                    'url' => $repo_data['html_url'],
+                ];
             }
         }
 
@@ -148,7 +157,7 @@ class RemoteRepository extends MainRepositoryAbstract
                 if (!empty($result)) {
                     foreach ($result as $repo) {
                         if (preg_match('/\#'.$tag.'/', $repo['description'])) {
-                            $release = $this->getLastRelease($repo['url']);
+                            $release = $this->getLastRelease($repo['url'], $repo);
                             $modules[] = [
                                 'name' => $repo['name'],
                                 'description' => $repo['description'],

@@ -66,7 +66,7 @@ class ModulesEvent extends Event
 
             if (!\count($permissions_old)) {
                 Permission::query()->insert($prepared_insert);
-                if ($main_user->checkPermissionTo('admin_access')) {
+                if ($main_user->checkPermissionTo(\Gcms::MAIN_ADMIN_PERMISSION)) {
                     $permissions_list = array_keys($prepared_insert);
                     $main_user->syncPermissions($permissions_list);
                 }
