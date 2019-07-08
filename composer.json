@@ -1,5 +1,5 @@
 {
-    "name": "zeloras/geekcms-packages-manager",
+    "name": "geekcms/packagesmanager",
     "description": "Package system list for geekcms",
     "keywords": [
         "geekcms",
