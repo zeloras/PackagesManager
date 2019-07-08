@@ -30,7 +30,9 @@
             "providers": [
                 "GeekCms\\PackagesManager\\Providers\\InitServiceProvider"
             ],
-            "aliases": {}
+            "aliases": {
+                "PackageSystem": "GeekCms\\PackagesManager\\Facades\\Packages"
+            }
         }
     },
     "autoload": {
