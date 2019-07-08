@@ -180,20 +180,26 @@ abstract class CoreComponent extends MainModule
     /**
      * CoreComponent constructor.
      *
+     * CoreComponent constructor.
      * @param Container $app
-     * @param string    $name
-     * @param string    $path
-     *
+     * @param null $name
+     * @param null $path
      * @throws \Exception
      */
     public function __construct(Container $app, $name = null, $path = null)
     {
+        if (empty($name) && empty($path)) {
+            return false;
+        }
+
         $this->setApp($app);
         $this->loadCoreComponents($name);
         $this->initVariables($this->getName(), $path);
 
         parent::__construct($app, $this->getName(), $this->getModulePath());
         parent::fireEvent('constructor');
+
+        return true;
     }
 
     /**
