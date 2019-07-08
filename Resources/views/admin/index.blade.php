@@ -35,7 +35,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#tabs-2-tab-2" role="tab" data-toggle="tab" aria-selected="false">
+                            <a class="nav-link disabled" href="#tabs-2-tab-2" role="tab" data-toggle="tab" aria-selected="false">
                                 <span class="nav-link-in">
                                     {{ \Translate::get('module_packagesmanager::admin/main.installed_unofficial_packages') }}
                                 </span>
@@ -53,7 +53,7 @@
                         @endif
                     </div>
                 </div><!--.tab-pane-->
-                <div role="tabpanel" class="tab-pane fade in active show" id="tabs-2-tab-2">
+                <div role="tabpanel" class="tab-pane fade in disabled" id="tabs-2-tab-2">
 
                 </div><!--.tab-pane-->
             </div><!--.tab-content-->

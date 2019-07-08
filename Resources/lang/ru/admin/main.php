@@ -12,5 +12,9 @@ return [
     'repository' => 'Репозиторий',
     'installed' => 'Установлен',
     'enabled' => 'Включен',
-    'updated' => 'Дата обновления'
+    'updated' => 'Дата обновления',
+    'action_module_install' => 'Уставноить этот модуль?',
+    'action_module_remove' => 'Удалить этот модуль с сайта?',
+    'action_module_disable' => 'Отключить этот модуль?',
+    'action_module_enable' => 'Включить этот модуль?'
 ];

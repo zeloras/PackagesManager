@@ -43,10 +43,18 @@
                 <a href="{{ $item['release']['url'] }}" target="_blank">{{ $item['release']['name']}}</a>
             </td>
             <td class="color-blue">
-                <i class="font-icon @if ($item['installed']) font-icon-ok @else font-icon-del @endif"></i>
+                @if ($item['installed'])
+                    <a data-delete="{{ \Translate::get('module_packagesmanager::admin/main.action_module_remove') }}" href="{{ route('admin.packages.change_install', ['module' => $item['module_info']['name']]) }}"><i class="font-icon font-icon-ok"></i></a>
+                @else
+                    <a data-delete="{{ \Translate::get('module_packagesmanager::admin/main.action_module_install') }}" href="{{ route('admin.packages.change_install', ['module' => $item['module_info']['name']]) }}"><i class="font-icon font-icon-del"></i></a>
+                @endif
             </td>
             <td class="color-blue">
-                <i class="font-icon @if ($item['enabled']) font-icon-ok @else font-icon-del @endif"></i>
+                @if ($item['enabled'])
+                    <a data-delete="{{ \Translate::get('module_packagesmanager::admin/main.action_module_disable') }}" href="{{ route('admin.packages.change_active', ['module' => $item['module_info']['name']]) }}"><i class="font-icon font-icon-ok"></i></a>
+                @else
+                    <a data-delete="{{ \Translate::get('module_packagesmanager::admin/main.action_module_enable') }}" href="{{ route('admin.packages.change_active', ['module' => $item['module_info']['name']]) }}"><i class="font-icon font-icon-del"></i></a>
+                @endif
             </td>
             <td class="table-date">
                 {{ date('Y-m-d', $item['release']['date']) }} <i class="font-icon font-icon-clock"></i>

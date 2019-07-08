@@ -2,10 +2,12 @@
 
 namespace GeekCms\PackagesManager\Repository;
 
+use GeekCms\PackagesManager\Facades\Packages;
 use GeekCms\PackagesManager\Modules\Module;
 use GeekCms\PackagesManager\Support\Components\ChildServiceProvider;
 use Illuminate\Container\Container;
 use Nwidart\Modules\FileRepository;
+use Nwidart\Modules\Process\Installer;
 
 class MainRepository extends FileRepository
 {
@@ -105,7 +107,7 @@ class MainRepository extends FileRepository
                     continue;
                 }
 
-                $check = preg_grep('/^'.preg_quote($item, '/').'.*?/i', get_declared_classes());
+                $check = preg_grep('/^'.preg_quote($item, DIRECTORY_SEPARATOR).'.*?/i', get_declared_classes());
                 if ($check) {
                     $preload_modules[$item] = $count;
                     ++$count;
@@ -124,6 +126,31 @@ class MainRepository extends FileRepository
     public function getModules()
     {
         return $this->main_repo_app;
+    }
+
+    public function findAndInstall($module)
+    {
+        $installed = false;
+        $handler = $this->main_repo_app->getHandler();
+        $modules = new $handler($this->main_repo_app->getOfficialPackages());
+        $for_install = array_filter($modules->forInstall(), function ($v) use ($module) {
+            return ($v['module_info']['name'] == $module);
+        });
+
+        if (count($for_install)) {
+            $module = array_values($for_install);
+            $module = $module[0];
+            $module = array_get($module['composer_info'], 'name', null);
+            if (!empty($module) && false) {
+                $installer = new Installer('zeloras/geekcms-packages-seo', 'dev-master', 'composer', false);
+                $installer = $installer->setPath(Packages::getPath());
+                $installer = $installer->run();
+                dd($installer, $module);
+                $installed = $installed->install();
+            }
+        }
+
+        return $installed;
     }
 
     /**

@@ -96,7 +96,7 @@ abstract class CoreComponent extends MainModule
      *
      * @var string
      */
-    protected $prefix = 'module_';
+    protected $prefix = '';
 
     /**
      * Prefix for admin routes.
@@ -143,7 +143,7 @@ abstract class CoreComponent extends MainModule
      *
      * @var array
      */
-    protected static $components_path = [
+    public static $components_path = [
         'modules' => self::PATH_MODULES,
         'resources' => self::PATH_RESOURCES,
         'main_lang' => 'lang/modules/',
@@ -193,6 +193,7 @@ abstract class CoreComponent extends MainModule
         }
 
         $this->setApp($app);
+        $this->setPrefix(\Gcms::MODULES_PREFIX);
         $this->loadCoreComponents($name);
         $this->initVariables($this->getName(), $path);
 
@@ -512,7 +513,7 @@ abstract class CoreComponent extends MainModule
     protected function loadCoreComponents($main_name = null)
     {
         $preg_fnc = function ($value) {
-            return preg_replace('/' . preg_quote(base_path(),'/') . '\\/|\\/\*$/uims', '', $value);
+            return preg_replace('/' . preg_quote(base_path(),DIRECTORY_SEPARATOR) . '\\/|\\/\*$/uims', '', $value);
         };
         $this->setName((empty($main_name)) ? $this->getName() : strtolower($main_name));
         $disk_name = $this::PATH_MODULES;

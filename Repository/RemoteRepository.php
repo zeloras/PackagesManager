@@ -6,8 +6,6 @@ use GeekCms\PackagesManager\Repository\Template\MainRepositoryAbstract;
 
 class RemoteRepository extends MainRepositoryAbstract
 {
-    protected $cacheCheckKey = 'get_url_cached_modules';
-
     /**
      * {@inheritdoc}
      */
@@ -42,7 +40,7 @@ class RemoteRepository extends MainRepositoryAbstract
      */
     protected function getRepositories()
     {
-        $module = $this->findOrFail('PackagesManager');
+        $module = $this->findOrFail(giveMeTheModuleName(static::class));
         if (!empty($module)) {
             $authors = $this->getDevelopers($module);
             $this->modules[self::PACKAGE_OFFICIAL] = $this->getMainModules($authors, $module);
@@ -60,7 +58,7 @@ class RemoteRepository extends MainRepositoryAbstract
      */
     protected function getGitData($url = '')
     {
-        return \Cache::remember($this->cacheCheckKey . '_' . $url, config('cache.settings.minutes', 10), function () use ($url) {
+        return \Cache::remember(self::CACHED_MODULES_LIST_KEY . '_' . $url, config(\Gcms::MAIN_CACHE_TIMEOUT_KEY, 10), function () use ($url) {
             try {
                 $headers = [
                     'Host: api.github.com',
@@ -96,7 +94,7 @@ class RemoteRepository extends MainRepositoryAbstract
         $last_release = [];
 
         if (!empty($url)) {
-            $releases = $this->getGitData($url.'/releases');
+            $releases = $this->getGitData($url . self::REPO_MODULE_LINK_RELEASES);
 
             if (!empty($releases) && !isset($releases['message'])) {
                 foreach ($releases as $release) {
@@ -154,9 +152,31 @@ class RemoteRepository extends MainRepositoryAbstract
      */
     public function getModuleInfo($url = null)
     {
+        return $this->getRepoFileContent($url . self::REPO_MODULE_LINK_MODULE_CONTENT);
+    }
+
+    /**
+     * Get module composer data
+     *
+     * @param null $url
+     * @return array|mixed
+     */
+    public function getComposerInfo($url = null)
+    {
+        return $this->getRepoFileContent($url . self::REPO_MODULE_LINK_COMPOSER_CONTENT);
+    }
+
+    /**
+     * Get file json content and decode from remote repo
+     *
+     * @param $url
+     * @return array|mixed
+     */
+    protected function getRepoFileContent($url)
+    {
         $info = [];
 
-        $model = $this->getGitData($url.'/contents/module.json');
+        $model = $this->getGitData($url);
         if (isset($model['content'])) {
             $content = base64_decode($model['content']);
             if ($content) {
@@ -191,6 +211,7 @@ class RemoteRepository extends MainRepositoryAbstract
                         if (isset($repo['description']) && preg_match('/\#'.$tag.'/', $repo['description'])) {
                             $release = $this->getLastRelease($repo['url'], $repo);
                             $model_info = $this->getModuleInfo($repo['url']);
+                            $composer_info = $this->getComposerInfo($repo['url']);
 
                             $modules[] = [
                                 'name' => $repo['name'],
@@ -200,6 +221,7 @@ class RemoteRepository extends MainRepositoryAbstract
                                 'url' => $repo['html_url'],
                                 'forks' => ($repo['forks']) ? $repo['forks_url'] : null,
                                 'module_info' => $model_info,
+                                'composer_info' => $composer_info,
                                 'installed' => false,
                                 'enabled' => false
                             ];

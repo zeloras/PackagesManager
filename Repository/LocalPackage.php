@@ -2,8 +2,6 @@
 
 namespace GeekCms\PackagesManager\Repository;
 
-use Illuminate\Support\Arr;
-
 class LocalPackage
 {
     protected $modules = [];
@@ -16,6 +14,9 @@ class LocalPackage
         $this->setStatuses();
     }
 
+    /**
+     * Set statuses for modules, e.g installed, enabled
+     */
     protected function setStatuses()
     {
         foreach ($this->modules_system as $module) {
@@ -32,6 +33,11 @@ class LocalPackage
         }
     }
 
+    /**
+     * Get all installed modules
+     *
+     * @return array
+     */
     public function installed()
     {
         $list = [];
@@ -44,6 +50,33 @@ class LocalPackage
         return $list;
     }
 
+    /**
+     * Get all available modules for install/remove
+     *
+     * @param bool $sort_desc
+     * @return array
+     */
+    public function available($sort_desc = false)
+    {
+        uasort($this->modules, function ($a, $b) use ($sort_desc) {
+            $weight = ($sort_desc) ? 1 : -1;
+            if ($a['installed'] && $b['installed']) {
+                $weight = ($a['enabled']) ? 1 : -1;
+            } elseif ($a['installed']) {
+                $weight = 1;
+            }
+
+            return (!$sort_desc) ? $weight * -1 : $weight;
+        });
+
+        return $this->modules;
+    }
+
+    /**
+     * Get all disabled modules
+     *
+     * @return array
+     */
     public function disabled()
     {
         $list = [];
@@ -56,11 +89,33 @@ class LocalPackage
         return $list;
     }
 
+    /**
+     * Get all enabled modules
+     *
+     * @return array
+     */
     public function enabled()
     {
         $list = [];
         foreach ($this->modules as $module) {
             if ($module['enabled']) {
+                $list[] = $module;
+            }
+        }
+
+        return $list;
+    }
+
+    /**
+     * Get all available for install modules
+     *
+     * @return array
+     */
+    public function forInstall()
+    {
+        $list = [];
+        foreach ($this->modules as $module) {
+            if (!$module['installed']) {
                 $list[] = $module;
             }
         }

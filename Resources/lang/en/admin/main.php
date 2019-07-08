@@ -12,5 +12,9 @@ return [
     'repository' => 'Repository',
     'installed' => 'Installed',
     'enabled' => 'Enabled',
-    'updated' => 'Last update'
+    'updated' => 'Last update',
+    'action_module_install' => 'Install module?',
+    'action_module_remove' => 'Remove this module from site?',
+    'action_module_disable' => 'Disable this module?',
+    'action_module_enable' => 'Enable this module?'
 ];

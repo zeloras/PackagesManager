@@ -26,6 +26,20 @@ abstract class MainRepositoryAbstract extends ModuleRepository
     const REPO_GROUP_LINK = 'https://api.github.com/orgs/*name*/repos';
 
     /**
+     * For github api
+     */
+    const REPO_MODULE_LINK_RELEASES = '/releases';
+    const REPO_MODULE_LINK_MODULE_CONTENT = '/contents/module.json';
+    const REPO_MODULE_LINK_COMPOSER_CONTENT = '/contents/composer.json';
+
+    /**
+     * Key for cache curl responses
+     *
+     * @var string
+     */
+    const CACHED_MODULES_LIST_KEY = 'get_url_cached_modules';
+
+    /**
      * Load classes for work with remote packages or local(downloaded).
      *
      * @var string
