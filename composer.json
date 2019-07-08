@@ -38,7 +38,10 @@
     "autoload": {
         "psr-4": {
             "GeekCms\\PackagesManager\\": ""
-        }
+        },
+        "files": [
+            "loader.php"
+        ]
     },
     "minimum-stability": "dev",
     "prefer-stable": true
