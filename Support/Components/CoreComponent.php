@@ -189,8 +189,8 @@ abstract class CoreComponent extends MainModule
     public function __construct(Container $app, $name = null, $path = null)
     {
         $this->setApp($app);
-        $this->loadCoreComponents();
-        $this->initVariables($name, $path);
+        $this->loadCoreComponents($name);
+        $this->initVariables($this->getName(), $path);
 
         parent::__construct($app, $this->getName(), $this->getModulePath());
         parent::fireEvent('constructor');
@@ -261,10 +261,13 @@ abstract class CoreComponent extends MainModule
 
     /**
      * Method for register module.
+     *
+     * @param null $main_name
+     * @throws \Exception
      */
-    public function register()
+    public function register($main_name = null)
     {
-        $this->loadCoreComponents();
+        $this->loadCoreComponents($main_name);
         $this->initVariables($this->getName(), $this->getPath());
 
         $this->registerConfig();
@@ -497,20 +500,47 @@ abstract class CoreComponent extends MainModule
 
     /**
      * Load bases components for work with module.
+     *
+     * @param null $main_name
      */
-    protected function loadCoreComponents()
+    protected function loadCoreComponents($main_name = null)
     {
+        $preg_fnc = function ($value) {
+            return preg_replace('/' . preg_quote(base_path(),'/') . '\\/|\\/\*$/uims', '', $value);
+        };
+        $this->setName((empty($main_name)) ? $this->getName() : strtolower($main_name));
+        $disk_name = $this::PATH_MODULES;
+
+        if (class_exists('Module')) {
+            $module_path = \Module::getModulePath($this->getName());
+            $scaned_paths = array_map(function ($val) use ($module_path, $preg_fnc) {
+                $preg_path = $preg_fnc($val);
+                $preg_module = $preg_fnc(dirname($module_path, 1));
+                return ($preg_path === $preg_module) ? strtolower($preg_module) : null;
+            }, \Module::getScanPaths());
+
+            $real_path = array_filter($scaned_paths, function ($value) {
+                return !empty($value);
+            });
+
+            if (count($real_path)) {
+                $disk_name_first = array_first($real_path);
+                $this::$components_path['modules'] = $disk_name_first;
+                $disk_name = isset($this->app['config']["filesystems.disks.{$disk_name_first}"]) ? $disk_name_first : $disk_name;
+            }
+        }
+
         if (!$this->getModuleLogs() instanceof \Log) {
             $this->setModuleLogs(\Log::channel($this::LOGS_CHANNEL));
         }
 
         if (class_exists('Storage')) {
             if (!$this->getModuleStorageInstance() instanceof \Storage) {
-                $this->setModuleStorageInstance(\Storage::disk($this::PATH_MODULES));
+                $this->setModuleStorageInstance(\Storage::disk($disk_name));
             }
 
             if (!$this->getResourcesStorageInstance() instanceof \Storage) {
-                $this->setResourcesStorageInstance(\Storage::disk($this::PATH_RESOURCES));
+                $this->setResourcesStorageInstance(\Storage::disk($disk_name));
             }
         }
     }
