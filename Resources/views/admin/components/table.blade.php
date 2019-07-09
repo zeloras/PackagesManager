@@ -44,9 +44,11 @@
             </td>
             <td class="color-blue">
                 @if ($item['installed'])
-                    <a data-delete="{{ \Translate::get('module_packagesmanager::admin/main.action_module_remove') }}" href="{{ route('admin.packages.change_install', ['module' => $item['module_info']['name']]) }}"><i class="font-icon font-icon-ok"></i></a>
+                    <i class="font-icon font-icon-ok"></i>
+                    <!--<a data-delete="{{ \Translate::get('module_packagesmanager::admin/main.action_module_remove') }}" href="{{ route('admin.packages.change_install', ['module' => $item['module_info']['name']]) }}"></a>-->
                 @else
-                    <a data-delete="{{ \Translate::get('module_packagesmanager::admin/main.action_module_install') }}" href="{{ route('admin.packages.change_install', ['module' => $item['module_info']['name']]) }}"><i class="font-icon font-icon-del"></i></a>
+                    <i class="font-icon font-icon-del"></i>
+                    <!--<a data-delete="{{ \Translate::get('module_packagesmanager::admin/main.action_module_install') }}" href="{{ route('admin.packages.change_install', ['module' => $item['module_info']['name']]) }}"></a>-->
                 @endif
             </td>
             <td class="color-blue">

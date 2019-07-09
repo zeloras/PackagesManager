@@ -16,7 +16,7 @@ class Packages extends Facade
     {
         $returned = null;
         $module_name = giveMeTheModuleName(static::class, null);
-        $settings = \Config::get('module_'.strtolower($module_name), null);
+        $settings = \Config::get(\Gcms::MODULES_PREFIX.strtolower($module_name), null);
 
         if (empty($settings)) {
             $module_config = module_path($module_name).\DIRECTORY_SEPARATOR.CoreComponent::CONFIG_PATH;

@@ -82,6 +82,38 @@ class RemoteRepository extends MainRepositoryAbstract
     }
 
     /**
+     * Get static data about packages
+     *
+     * @param string $url
+     * @return array
+     */
+    protected function getLocalData($url = '')
+    {
+        $main_list = [];
+        $main_info = pathinfo(__DIR__);
+        $list = file_get_contents($main_info['dirname'] . DIRECTORY_SEPARATOR . 'repo.json');
+        $list = json_decode($list, true);
+
+        if ($list && count($list)) {
+            $main_list = $list['official_packages'];
+            foreach ($main_list as $module => $value) {
+                $find_module = $this->findOrFail($module);
+                $find_module = $find_module->getPath() . DIRECTORY_SEPARATOR;
+                $find_composer = file_get_contents($find_module . 'composer.json');
+                $find_init = file_get_contents($find_module . 'module.json');
+
+                $find_composer = json_decode($find_composer, true);
+                $find_init = json_decode($find_init, true);
+
+                $main_list[$module]['composer_info'] = ($find_composer && count($find_composer)) ? $find_composer : [];
+                $main_list[$module]['module_info'] = ($find_init && count($find_init)) ? $find_init : [];
+            }
+        }
+
+        return $main_list;
+    }
+
+    /**
      * Get last module version with info by repo project url.
      *
      * @param null $url
@@ -175,7 +207,6 @@ class RemoteRepository extends MainRepositoryAbstract
     protected function getRepoFileContent($url)
     {
         $info = [];
-
         $model = $this->getGitData($url);
         if (isset($model['content'])) {
             $content = base64_decode($model['content']);
@@ -198,13 +229,17 @@ class RemoteRepository extends MainRepositoryAbstract
      *
      * @return array
      */
-    protected function getMainModules($authors = [], $module = null)
+    protected function getMainModules($authors = [], $module = null, $local = true)
     {
         $modules = [];
         if (!empty($authors) && !empty($module)) {
             $tag = $module->get('packages-tag', null);
 
             foreach ($authors as $author) {
+                if ($local) {
+                    return $this->getLocalData();
+                }
+
                 $result = $this->getGitData($author);
                 if (!empty($result)) {
                     foreach ($result as $repo) {
@@ -216,12 +251,13 @@ class RemoteRepository extends MainRepositoryAbstract
                             $modules[] = [
                                 'name' => $repo['name'],
                                 'vendor' => $repo['owner']['login'],
-                                'description' => $repo['description'],
+                                'description' => preg_replace('/^[^\s]+/imus', '', $repo['description']),
                                 'release' => $release,
                                 'url' => $repo['html_url'],
                                 'forks' => ($repo['forks']) ? $repo['forks_url'] : null,
                                 'module_info' => $model_info,
                                 'composer_info' => $composer_info,
+                                'is_official' => true,
                                 'installed' => false,
                                 'enabled' => false
                             ];

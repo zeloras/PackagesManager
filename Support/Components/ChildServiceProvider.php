@@ -40,7 +40,7 @@ class ChildServiceProvider extends CoreComponent
                             null,
                             ['icon' => $icon]
                         );
-                    } elseif (!isset($menu_item['child'])) {
+                    } elseif (!isset($menu_item['child']) || !\count($menu_item['child'])) {
                         $adminSidenav->route($this->getAdminRoutePrefix().$route, $this->getNavname().$name, null, [
                             'icon' => $icon,
                         ]);

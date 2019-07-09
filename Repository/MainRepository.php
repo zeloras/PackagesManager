@@ -2,12 +2,11 @@
 
 namespace GeekCms\PackagesManager\Repository;
 
-use GeekCms\PackagesManager\Facades\Packages;
 use GeekCms\PackagesManager\Modules\Module;
 use GeekCms\PackagesManager\Support\Components\ChildServiceProvider;
 use Illuminate\Container\Container;
 use Nwidart\Modules\FileRepository;
-use Nwidart\Modules\Process\Installer;
+use GeekCms\PackagesManager\Repository\Components\ManageLocalPackage;
 
 class MainRepository extends FileRepository
 {
@@ -140,13 +139,11 @@ class MainRepository extends FileRepository
         if (count($for_install)) {
             $module = array_values($for_install);
             $module = $module[0];
-            $module = array_get($module['composer_info'], 'name', null);
-            if (!empty($module) && false) {
-                $installer = new Installer('zeloras/geekcms-packages-seo', 'dev-master', 'composer', false);
-                $installer = $installer->setPath(Packages::getPath());
-                $installer = $installer->run();
-                dd($installer, $module);
-                $installed = $installed->install();
+
+            if (!empty($module)) {
+                $package = new ManageLocalPackage();
+                $installer = $package->install($module, $this->path);
+                dd($installer);
             }
         }
 
