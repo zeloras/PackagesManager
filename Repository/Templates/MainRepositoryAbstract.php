@@ -6,6 +6,7 @@ use GeekCms\PackagesManager\Repository\LocalPackage;
 use GeekCms\PackagesManager\Repository\MainRepository;
 use GeekCms\PackagesManager\Repository\RemoteRepository;
 use Illuminate\Container\Container;
+use Nwidart\Modules\Exceptions\ModuleNotFoundException;
 use Nwidart\Modules\FileRepository as ModuleRepository;
 use Nwidart\Modules\Laravel\Module;
 
@@ -64,8 +65,8 @@ abstract class MainRepositoryAbstract extends ModuleRepository
     /**
      * MainRepositoryAbstract constructor.
      *
-     * @param Container      $app
-     * @param null           $path
+     * @param Container $app
+     * @param null $path
      * @param MainRepository $instance
      */
     public function __construct(Container $app, $path = null, MainRepository $instance = null)
@@ -77,9 +78,9 @@ abstract class MainRepositoryAbstract extends ModuleRepository
     /**
      * Get official packages list.
      *
-     * @throws \Nwidart\Modules\Exceptions\ModuleNotFoundException
-     *
      * @return LocalPackage
+     * @throws ModuleNotFoundException
+     *
      */
     public function getOfficialPackages()
     {
@@ -90,9 +91,9 @@ abstract class MainRepositoryAbstract extends ModuleRepository
     /**
      * Get unofficial packages list.
      *
-     * @throws \Nwidart\Modules\Exceptions\ModuleNotFoundException
-     *
      * @return LocalPackage
+     * @throws ModuleNotFoundException
+     *
      */
     public function getUnofficialPackages()
     {
@@ -112,7 +113,7 @@ abstract class MainRepositoryAbstract extends ModuleRepository
     /**
      * Switch to main class.
      *
-     * @return MainRepository
+     * @return MainRepository|string
      */
     public function getHandler()
     {

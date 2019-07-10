@@ -1,6 +1,6 @@
 @extends('admin.layouts.main')
 
-@section('title', \Translate::get('module_packagesmanager::admin/sidenav.name'))
+@section('title', Translate::get('module_packagesmanager::admin/sidenav.name'))
 
 @section('content')
     {{--
@@ -21,43 +21,45 @@
     </header>
 </section> --}}
 
-<section class="box-typical">
-    <div class="box-typical-body">
-        <section class="tabs-section tab-section__no-border">
-            <div class="tabs-section-nav">
-                <div class="tbl">
-                    <ul class="nav" role="tablist">
-                        <li class="nav-item">
-                            <a class="nav-link active show" href="#tabs-2-tab-1" role="tab" data-toggle="tab" aria-selected="true">
+    <section class="box-typical">
+        <div class="box-typical-body">
+            <section class="tabs-section tab-section__no-border">
+                <div class="tabs-section-nav">
+                    <div class="tbl">
+                        <ul class="nav" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active show" href="#tabs-2-tab-1" role="tab" data-toggle="tab"
+                                   aria-selected="true">
                                 <span class="nav-link-in">
-                                    {{ \Translate::get('module_packagesmanager::admin/main.installed_official_packages') }}
+                                    {{ Translate::get('module_packagesmanager::admin/main.installed_official_packages') }}
                                 </span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link disabled" href="#tabs-2-tab-2" role="tab" data-toggle="tab" aria-selected="false">
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link disabled" href="#tabs-2-tab-2" role="tab" data-toggle="tab"
+                                   aria-selected="false">
                                 <span class="nav-link-in">
-                                    {{ \Translate::get('module_packagesmanager::admin/main.installed_unofficial_packages') }}
+                                    {{ Translate::get('module_packagesmanager::admin/main.installed_unofficial_packages') }}
                                 </span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div><!--.tabs-section-nav-->
-
-            <div class="tab-content">
-                <div role="tabpanel" class="tab-pane fade in active show" id="tabs-2-tab-1">
-                    <div class="table-responsive">
-                        @if(isset($list))
-                            @include('packagesmanager::admin.components.table', $list)
-                        @endif
+                                </a>
+                            </li>
+                        </ul>
                     </div>
-                </div><!--.tab-pane-->
-                <div role="tabpanel" class="tab-pane fade in disabled" id="tabs-2-tab-2">
+                </div><!--.tabs-section-nav-->
 
-                </div><!--.tab-pane-->
-            </div><!--.tab-content-->
-        </section>
-    </div>
-</section>
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane fade in active show" id="tabs-2-tab-1">
+                        <div class="table-responsive">
+                            @if(isset($list))
+                                @include('packagesmanager::admin.components.table', $list)
+                            @endif
+                        </div>
+                    </div><!--.tab-pane-->
+                    <div role="tabpanel" class="tab-pane fade in disabled" id="tabs-2-tab-2">
+
+                    </div><!--.tab-pane-->
+                </div><!--.tab-content-->
+            </section>
+        </div>
+    </section>
 @endsection

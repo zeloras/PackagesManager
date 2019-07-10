@@ -5,9 +5,14 @@ namespace GeekCms\PackagesManager\Events;
 use App\Events\Event;
 use App\Models\User;
 use Carbon\Carbon;
+use DB;
+use Gcms;
 use GeekCms\PackagesManager\Models\Modules;
 use Illuminate\Support\Facades\Schema;
+use Packages;
 use Spatie\Permission\Models\Permission;
+use Throwable;
+use function count;
 
 /**
  * Class ModulesEvent.
@@ -18,10 +23,10 @@ class ModulesEvent extends Event
      * ModulesEvent constructor.
      *
      * @param Modules $model
-     * @param User    $user
-     * @param null    $type
+     * @param User $user
+     * @param null $type
      *
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function __construct(Modules $model, User $user, $type = null)
     {
@@ -32,7 +37,7 @@ class ModulesEvent extends Event
     /**
      * Method for check new permission roles and update permission table.
      *
-     * @throws \Throwable
+     * @throws Throwable
      */
     public static function checkAndUpdatePermissions()
     {
@@ -41,7 +46,7 @@ class ModulesEvent extends Event
         }
 
         $main_user = User::first();
-        $permissions = \Packages::getPermissionsList();
+        $permissions = Packages::getPermissionsList();
         $permissions_list = $prepared_insert = [];
         $current_time = Carbon::now();
         array_map(function ($arr) use (&$permissions_list, &$prepared_insert, $current_time) {
@@ -60,17 +65,17 @@ class ModulesEvent extends Event
             return null;
         }, $permissions);
 
-        \DB::transaction(function () use ($permissions_list, $prepared_insert, $main_user) {
+        DB::transaction(function () use ($permissions_list, $prepared_insert, $main_user) {
             $permissions_list = array_unique($permissions_list);
             $permissions_old = Permission::whereIn('name', $permissions_list)->get();
 
-            if (!\count($permissions_old)) {
+            if (!count($permissions_old)) {
                 Permission::query()->insert($prepared_insert);
-                if ($main_user->checkPermissionTo(\Gcms::MAIN_ADMIN_PERMISSION)) {
+                if ($main_user->checkPermissionTo(Gcms::MAIN_ADMIN_PERMISSION)) {
                     $permissions_list = array_keys($prepared_insert);
                     $main_user->syncPermissions($permissions_list);
                 }
-            } elseif (\count($permissions_old) !== \count($permissions_list)) {
+            } elseif (count($permissions_old) !== count($permissions_list)) {
                 foreach ($permissions_old as $arr_old) {
                     unset($prepared_insert[$arr_old->name]);
                 }
@@ -78,5 +83,7 @@ class ModulesEvent extends Event
                 Permission::query()->insert($prepared_insert);
             }
         });
+
+        return true;
     }
 }

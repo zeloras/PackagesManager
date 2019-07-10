@@ -91,7 +91,7 @@ var adminMainComponent = {
 
             let xhr = new XMLHttpRequest();
 
-            xhr.onload = xhr.onerror = function() {
+            xhr.onload = xhr.onerror = function () {
                 document.location.reload();
             };
 
@@ -146,7 +146,7 @@ var adminMainComponent = {
     generateSlug: function (text, configure) {
         let self = adminMainComponent;
         let config = self.config;
-        let xregexp = (typeof(XRegExp) === 'undefined') ? true : false;
+        let xregexp = (typeof (XRegExp) === 'undefined');
 
         text = String(text);
         configure = Object(configure);
@@ -263,7 +263,7 @@ var adminMainComponent = {
         let arguments_list = (args.hasOwnProperty(0)) ? args[0] : {};
         let replaceFunc = function (template, arr, key) {
             let value = arr[key];
-            let name = (/^\_/.test(key)) ? '%' + key.replace(/^\_/, '') + '%' : '\\%data\\.' + key + '\\%';
+            let name = (/^_/.test(key)) ? '%' + key.replace(/^_/, '') + '%' : '\\%data\\.' + key + '\\%';
             value = (typeof value === "array" || typeof value === "object") ? JSON.stringify(value) : value;
 
             if (arr.hasOwnProperty('is.data.main') && arr['is.data.main'] && /^is\.data\./.test(key) && !/^is\.data\.main/.test(key)) {
@@ -342,7 +342,9 @@ var adminMainComponent = {
      * @return {(function(): null)|*}
      */
     parseCallbackString: function (callback, call, ...args) {
-        let callback_function = function () {return null};
+        let callback_function = function () {
+            return null
+        };
         let arguments_list = args;
         let called = window;
         call = call || false;
@@ -385,7 +387,7 @@ var adminMainComponent = {
     countCloneGroups: function (clone_list, clone_item) {
         clone_item = clone_item || false;
         let container = $(clone_list);
-        let regexp = new RegExp('\\[(\\d+)\\]', 'is');
+        let regexp = new RegExp('\\[(\\d+)]', 'is');
         let items = (clone_item) ? container.find(clone_item) : {};
         let counts = [];
         let id = 0;
@@ -420,6 +422,7 @@ var adminMainComponent = {
      */
     holdTimeout: function (alias, fn, time) {
         let self = adminMainComponent;
+
         function _clear() {
             clearInterval(window[storageKey][alias]);
             window[storageKey][alias] = false;
@@ -482,14 +485,14 @@ var adminMainComponent = {
         // type=text
         if (element.is('input')) {
             let type = element.attr('type');
-            if (type == 'text' || type == 'number' || type == 'hidden') {
+            if (type === 'text' || type === 'number' || type === 'hidden') {
                 element.val(value);
             }
         }
 
         // type=checkbox
-        if (element.is('input') && element.attr('type') == 'checkbox') {
-            element.prop('checked', (value == "1") ? true : false);
+        if (element.is('input') && element.attr('type') === 'checkbox') {
+            element.prop('checked', (value === "1"));
         }
 
         // type=textarea

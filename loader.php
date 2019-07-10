@@ -4,7 +4,7 @@ if (!function_exists('giveMeTheModuleName')) {
     /**
      * Retur admin prefx with uri string.
      *
-     * @param string      $class
+     * @param string $class
      * @param null|string $default
      *
      * @return null|string

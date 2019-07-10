@@ -3,7 +3,10 @@
 namespace GeekCms\PackagesManager\Http\Controllers;
 
 use GeekCms\PackagesManager\Facades\Packages;
+use Illuminate\Contracts\View\Factory;
 use Illuminate\Routing\Controller;
+use Illuminate\View\View;
+use Nwidart\Modules\Exceptions\ModuleNotFoundException;
 
 /**
  * Class AdminController.
@@ -13,9 +16,9 @@ class AdminController extends Controller
     /**
      * Main route with installed packages.
      *
-     * @throws \Nwidart\Modules\Exceptions\ModuleNotFoundException
+     * @return Factory|View
+     * @throws ModuleNotFoundException
      *
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
     public function index()
     {
@@ -30,7 +33,7 @@ class AdminController extends Controller
     /**
      * Route for show page with available modules list.
      *
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @return Factory|View
      */
     public function list()
     {

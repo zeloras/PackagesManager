@@ -1,179 +1,175 @@
 {
-    "official_packages": {
-        "feedback": {
-            "name": "geekcms/feedback",
-            "vendor": "geekcms",
-            "description": "Package for feedback forms",
-            "release": {
-                "name": "master",
-                "version": "0.06",
-                "download": "http://zip",
-                "date": "9878267364",
-                "url": "https://github.com/zeloras/geekcms-module-feedback"
-            },
-            "url": "https://github.com/zeloras/geekcms-module-feedback",
-            "forks": "null",
-            "module_info": {},
-            "composer_info": {},
-            "is_official": "true",
-            "installed": "true",
-            "enabled": "false"
-        },
-        "menu": {
-            "name": "geekcms/menu",
-            "vendor": "geekcms",
-            "description": "Package for manage menu on site",
-            "release": {
-                "name": "master",
-                "version": "0.06",
-                "download": "http://zip",
-                "date": "9878267364",
-                "url": "https://github.com/zeloras/geekcms-module-menu"
-            },
-            "url": "https://github.com/zeloras/geekcms-module-menu",
-            "forks": "null",
-            "module_info": {},
-            "composer_info": {},
-            "is_official": "true",
-            "installed": "true",
-            "enabled": "false"
-        },
-        "packagesmanager": {
-            "name": "geekcms/packagesmanager",
-            "vendor": "geekcms",
-            "description": "Package system list for geekcms",
-            "release": {
-                "name": "master",
-                "version": "0.06",
-                "download": "http://zip",
-                "date": "9878267364",
-                "url": "https://github.com/zeloras/PackagesManager"
-            },
-            "url": "https://github.com/zeloras/PackagesManager",
-            "forks": "null",
-            "module_info": {},
-            "composer_info": {},
-            "is_official": "true",
-            "installed": "true",
-            "enabled": "true"
-        },
-        "pages": {
-            "name": "geekcms/pages",
-            "vendor": "geekcms",
-            "description": "Package for manage pages and translates for their",
-            "release": {
-                "name": "master",
-                "version": "0.06",
-                "download": "http://zip",
-                "date": "9878267364",
-                "url": "https://github.com/zeloras/geekcms-module-pages"
-            },
-            "url": "https://github.com/zeloras/geekcms-module-pages",
-            "forks": "null",
-            "module_info": {},
-            "composer_info": {},
-            "is_official": "true",
-            "installed": "true",
-            "enabled": "false"
-        },
-        "seo": {
-            "name": "geekcms/seo",
-            "vendor": "geekcms",
-            "description": "Package for seo features",
-            "release": {
-                "name": "master",
-                "version": "0.06",
-                "download": "http://zip",
-                "date": "9878267364",
-                "url": "https://github.com/zeloras/geekcms-module-seo"
-            },
-            "url": "https://github.com/zeloras/geekcms-module-seo",
-            "forks": "null",
-            "module_info": {},
-            "composer_info": {},
-            "is_official": "true",
-            "installed": "true",
-            "enabled": "false"
-        },
-        "setting": {
-            "name": "geekcms/setting",
-            "vendor": "geekcms",
-            "description": "Package for settings manage",
-            "release": {
-                "name": "master",
-                "version": "0.06",
-                "download": "http://zip",
-                "date": "9878267364",
-                "url": "https://github.com/zeloras/geekcms-module-setting"
-            },
-            "url": "https://github.com/zeloras/geekcms-module-setting",
-            "forks": "null",
-            "module_info": {},
-            "composer_info": {},
-            "is_official": "true",
-            "installed": "true",
-            "enabled": "false"
-        },
-
-        "translates": {
-            "name": "geekcms/translates",
-            "vendor": "geekcms",
-            "description": "Package for create translates",
-            "release": {
-                "name": "master",
-                "version": "0.06",
-                "download": "http://zip",
-                "date": "9878267364",
-                "url": "https://github.com/zeloras/geekcms-module-translates"
-            },
-            "url": "https://github.com/zeloras/geekcms-module-translates",
-            "forks": "null",
-            "module_info": {},
-            "composer_info": {},
-            "is_official": "true",
-            "installed": "true",
-            "enabled": "false"
-        },
-
-
-        "users": {
-            "name": "geekcms/users",
-            "vendor": "geekcms",
-            "description": "Package for manage users",
-            "release": {
-                "name": "master",
-                "version": "0.06",
-                "download": "http://zip",
-                "date": "9878267364",
-                "url": "https://github.com/zeloras/geekcms-module-users"
-            },
-            "url": "https://github.com/zeloras/geekcms-module-users",
-            "forks": "null",
-            "module_info": {},
-            "composer_info": {},
-            "is_official": "true",
-            "installed": "true",
-            "enabled": "false"
-        },
-
-        "content": {
-            "name": "geekcms/content",
-            "vendor": "geekcms",
-            "description": "Package for manage content",
-            "release": {
-                "name": "master",
-                "version": "0.06",
-                "download": "http://zip",
-                "date": "9878267364",
-                "url": "https://github.com/zeloras/geekcms-module-content"
-            },
-            "url": "https://github.com/zeloras/geekcms-module-content",
-            "forks": "null",
-            "module_info": {},
-            "composer_info": {},
-            "is_official": "true",
-            "installed": "true",
-            "enabled": "false"
-        }
+  "official_packages": {
+    "feedback": {
+      "name": "geekcms/feedback",
+      "vendor": "geekcms",
+      "description": "Package for feedback forms",
+      "release": {
+        "name": "master",
+        "version": "0.06",
+        "download": "http://zip",
+        "date": "9878267364",
+        "url": "https://github.com/zeloras/geekcms-module-feedback"
+      },
+      "url": "https://github.com/zeloras/geekcms-module-feedback",
+      "forks": "null",
+      "module_info": {},
+      "composer_info": {},
+      "is_official": "true",
+      "installed": "true",
+      "enabled": "false"
+    },
+    "menu": {
+      "name": "geekcms/menu",
+      "vendor": "geekcms",
+      "description": "Package for manage menu on site",
+      "release": {
+        "name": "master",
+        "version": "0.06",
+        "download": "http://zip",
+        "date": "9878267364",
+        "url": "https://github.com/zeloras/geekcms-module-menu"
+      },
+      "url": "https://github.com/zeloras/geekcms-module-menu",
+      "forks": "null",
+      "module_info": {},
+      "composer_info": {},
+      "is_official": "true",
+      "installed": "true",
+      "enabled": "false"
+    },
+    "packagesmanager": {
+      "name": "geekcms/packagesmanager",
+      "vendor": "geekcms",
+      "description": "Package system list for geekcms",
+      "release": {
+        "name": "master",
+        "version": "0.06",
+        "download": "http://zip",
+        "date": "9878267364",
+        "url": "https://github.com/zeloras/PackagesManager"
+      },
+      "url": "https://github.com/zeloras/PackagesManager",
+      "forks": "null",
+      "module_info": {},
+      "composer_info": {},
+      "is_official": "true",
+      "installed": "true",
+      "enabled": "true"
+    },
+    "pages": {
+      "name": "geekcms/pages",
+      "vendor": "geekcms",
+      "description": "Package for manage pages and translates for their",
+      "release": {
+        "name": "master",
+        "version": "0.06",
+        "download": "http://zip",
+        "date": "9878267364",
+        "url": "https://github.com/zeloras/geekcms-module-pages"
+      },
+      "url": "https://github.com/zeloras/geekcms-module-pages",
+      "forks": "null",
+      "module_info": {},
+      "composer_info": {},
+      "is_official": "true",
+      "installed": "true",
+      "enabled": "false"
+    },
+    "seo": {
+      "name": "geekcms/seo",
+      "vendor": "geekcms",
+      "description": "Package for seo features",
+      "release": {
+        "name": "master",
+        "version": "0.06",
+        "download": "http://zip",
+        "date": "9878267364",
+        "url": "https://github.com/zeloras/geekcms-module-seo"
+      },
+      "url": "https://github.com/zeloras/geekcms-module-seo",
+      "forks": "null",
+      "module_info": {},
+      "composer_info": {},
+      "is_official": "true",
+      "installed": "true",
+      "enabled": "false"
+    },
+    "setting": {
+      "name": "geekcms/setting",
+      "vendor": "geekcms",
+      "description": "Package for settings manage",
+      "release": {
+        "name": "master",
+        "version": "0.06",
+        "download": "http://zip",
+        "date": "9878267364",
+        "url": "https://github.com/zeloras/geekcms-module-setting"
+      },
+      "url": "https://github.com/zeloras/geekcms-module-setting",
+      "forks": "null",
+      "module_info": {},
+      "composer_info": {},
+      "is_official": "true",
+      "installed": "true",
+      "enabled": "false"
+    },
+    "translates": {
+      "name": "geekcms/translates",
+      "vendor": "geekcms",
+      "description": "Package for create translates",
+      "release": {
+        "name": "master",
+        "version": "0.06",
+        "download": "http://zip",
+        "date": "9878267364",
+        "url": "https://github.com/zeloras/geekcms-module-translates"
+      },
+      "url": "https://github.com/zeloras/geekcms-module-translates",
+      "forks": "null",
+      "module_info": {},
+      "composer_info": {},
+      "is_official": "true",
+      "installed": "true",
+      "enabled": "false"
+    },
+    "users": {
+      "name": "geekcms/users",
+      "vendor": "geekcms",
+      "description": "Package for manage users",
+      "release": {
+        "name": "master",
+        "version": "0.06",
+        "download": "http://zip",
+        "date": "9878267364",
+        "url": "https://github.com/zeloras/geekcms-module-users"
+      },
+      "url": "https://github.com/zeloras/geekcms-module-users",
+      "forks": "null",
+      "module_info": {},
+      "composer_info": {},
+      "is_official": "true",
+      "installed": "true",
+      "enabled": "false"
+    },
+    "content": {
+      "name": "geekcms/content",
+      "vendor": "geekcms",
+      "description": "Package for manage content",
+      "release": {
+        "name": "master",
+        "version": "0.06",
+        "download": "http://zip",
+        "date": "9878267364",
+        "url": "https://github.com/zeloras/geekcms-module-content"
+      },
+      "url": "https://github.com/zeloras/geekcms-module-content",
+      "forks": "null",
+      "module_info": {},
+      "composer_info": {},
+      "is_official": "true",
+      "installed": "true",
+      "enabled": "false"
     }
+  }
 }

@@ -2,6 +2,8 @@
 
 namespace GeekCms\PackagesManager\Repository;
 
+use Module;
+
 class LocalPackage
 {
     protected $modules = [];
@@ -10,7 +12,7 @@ class LocalPackage
     public function __construct($data = [])
     {
         $this->modules = $data;
-        $this->modules_system = \Module::all();
+        $this->modules_system = Module::all();
         $this->setStatuses();
     }
 

@@ -1,16 +1,19 @@
 <?php
 
 namespace GeekCms\PackagesManager\Repository\Components;
-use Nwidart\Modules\Process\Installer;
+
 use Illuminate\Console\Command;
-use Symfony\Component\Process\Process;
 use League\Flysystem\Adapter\Local;
 use League\Flysystem\Filesystem;
+use Nwidart\Modules\Process\Installer;
+use Symfony\Component\Process\Process;
 
 
 class ManageLocalPackage extends Installer
 {
-    public function __construct() {}
+    public function __construct()
+    {
+    }
 
     public function install(array $module_info = [], $install_dir = null)
     {
@@ -42,22 +45,6 @@ class ManageLocalPackage extends Installer
         die();
     }
 
-    /**
-     * Install the module via composer.
-     *
-     * @return \Symfony\Component\Process\Process
-     */
-    public function installViaComposer()
-    {
-        $dir = base_path();
-        $pack = $this->getPackageName(); //--no-suggest
-        $flags = '--prefer-dist --no-scripts --working-dir="' . $dir . '"';
-        $export = 'export HOME="' . $dir .'" && cd "$HOME" && ';
-        $composer_require = 'composer ' . $flags . ' --no-update require "'. $pack .'" && ';
-        $composer_install = $composer_require . 'composer ' . $flags . ' update "'. $pack .'"';
-        return new Process($export . $composer_install);
-    }
-
     public static function copy($remote, $desDir)
     {
         $adapter = new Local($desDir);
@@ -76,5 +63,21 @@ class ManageLocalPackage extends Installer
         }
 
         return null;
+    }
+
+    /**
+     * Install the module via composer.
+     *
+     * @return Process
+     */
+    public function installViaComposer()
+    {
+        $dir = base_path();
+        $pack = $this->getPackageName(); //--no-suggest
+        $flags = '--prefer-dist --no-scripts --working-dir="' . $dir . '"';
+        $export = 'export HOME="' . $dir . '" && cd "$HOME" && ';
+        $composer_require = 'composer ' . $flags . ' --no-update require "' . $pack . '" && ';
+        $composer_install = $composer_require . 'composer ' . $flags . ' update "' . $pack . '"';
+        return new Process($export . $composer_install);
     }
 }

@@ -2,8 +2,9 @@
 
 namespace GeekCms\PackagesManager\Providers;
 
-use GeekCms\PackagesManager\Support\ServiceProvider as MainServiceProvider;
 use GeekCms\Menu\Libs\Admin\AdminSidenav;
+use GeekCms\PackagesManager\Support\ServiceProvider as MainServiceProvider;
+use Menu;
 
 /**
  * Class InitServiceProvider.
@@ -15,9 +16,9 @@ class InitServiceProvider extends MainServiceProvider
      */
     public function registerNavigation()
     {
-        \Menu::create('admin.sidenav', function ($menu) {
+        Menu::create('admin.sidenav', function ($menu) {
             $menu->setPresenter(AdminSidenav::class);
-            $menu->route('admin', $this->getPrefix().$this->getName().'::admin/sidenav.Dashboard', [], null, [
+            $menu->route('admin', $this->getPrefix() . $this->getName() . '::admin/sidenav.Dashboard', [], null, [
                 'icon' => 'font-icon font-icon-dashboard',
             ]);
         });

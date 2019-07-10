@@ -2,7 +2,11 @@
 
 namespace GeekCms\PackagesManager\Repository;
 
+use Cache;
+use Exception;
+use Gcms;
 use GeekCms\PackagesManager\Repository\Template\MainRepositoryAbstract;
+use Nwidart\Modules\Exceptions\ModuleNotFoundException;
 
 class RemoteRepository extends MainRepositoryAbstract
 {
@@ -19,24 +23,11 @@ class RemoteRepository extends MainRepositoryAbstract
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function getUnofficialPackages()
-    {
-        if (empty($this->modules[self::PACKAGE_UNOFFICIAL])) {
-            $modules = $this->getRepositories()[self::PACKAGE_OFFICIAL];
-            $this->modules[self::PACKAGE_UNOFFICIAL] = $this->getForksModules($modules);
-        }
-
-        return $this->modules[self::PACKAGE_UNOFFICIAL];
-    }
-
-    /**
      * Prepare repositories list.
      *
-     * @throws \Nwidart\Modules\Exceptions\ModuleNotFoundException
-     *
      * @return array
+     * @throws ModuleNotFoundException
+     *
      */
     protected function getRepositories()
     {
@@ -50,35 +41,73 @@ class RemoteRepository extends MainRepositoryAbstract
     }
 
     /**
-     * Send curl request to git.
+     * Get official developers and groups.
      *
-     * @param string $url
+     * @param null $module
      *
-     * @return mixed
+     * @return array
      */
-    protected function getGitData($url = '')
+    protected function getDevelopers($module = null)
     {
-        return \Cache::remember(self::CACHED_MODULES_LIST_KEY . '_' . $url, config(\Gcms::MAIN_CACHE_TIMEOUT_KEY, 10), function () use ($url) {
-            try {
-                $headers = [
-                    'Host: api.github.com',
-                    'User-Agent: curl/7.52.1',
-                    'Accept: */*',
-                ];
-
-                $ch = curl_init($url);
-                curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-                $result = curl_exec($ch);
-                curl_close($ch);
-
-                return json_decode($result, true);
-            } catch (\Exception $e) {
-                return [];
+        $authors = [];
+        if (!empty($module)) {
+            $authors = $module->get('packages-authors', null);
+            foreach ($authors as $uid => $author) {
+                $authors[$uid] = preg_replace('/\\*name\\*/ims', $author, self::REPO_USER_LINK);
             }
-        });
+        }
+
+        return $authors;
+    }
+
+    /**
+     * Get official modules and all forks.
+     *
+     * @param array $authors
+     * @param null $module
+     *
+     * @param bool $local
+     * @return array
+     */
+    protected function getMainModules($authors = [], $module = null, $local = true)
+    {
+        $modules = [];
+        if (!empty($authors) && !empty($module)) {
+            $tag = $module->get('packages-tag', null);
+
+            foreach ($authors as $author) {
+                if ($local) {
+                    return $this->getLocalData();
+                }
+
+                $result = $this->getGitData($author);
+                if (!empty($result)) {
+                    foreach ($result as $repo) {
+                        if (isset($repo['description']) && preg_match('/\#' . $tag . '/', $repo['description'])) {
+                            $release = $this->getLastRelease($repo['url'], $repo);
+                            $model_info = $this->getModuleInfo($repo['url']);
+                            $composer_info = $this->getComposerInfo($repo['url']);
+
+                            $modules[] = [
+                                'name' => $repo['name'],
+                                'vendor' => $repo['owner']['login'],
+                                'description' => preg_replace('/^[^\s]+/imus', '', $repo['description']),
+                                'release' => $release,
+                                'url' => $repo['html_url'],
+                                'forks' => ($repo['forks']) ? $repo['forks_url'] : null,
+                                'module_info' => $model_info,
+                                'composer_info' => $composer_info,
+                                'is_official' => true,
+                                'installed' => false,
+                                'enabled' => false
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+
+        return $modules;
     }
 
     /**
@@ -111,6 +140,38 @@ class RemoteRepository extends MainRepositoryAbstract
         }
 
         return $main_list;
+    }
+
+    /**
+     * Send curl request to git.
+     *
+     * @param string $url
+     *
+     * @return mixed
+     */
+    protected function getGitData($url = '')
+    {
+        return Cache::remember(self::CACHED_MODULES_LIST_KEY . '_' . $url, config(Gcms::MAIN_CACHE_TIMEOUT_KEY, 10), function () use ($url) {
+            try {
+                $headers = [
+                    'Host: api.github.com',
+                    'User-Agent: curl/7.52.1',
+                    'Accept: */*',
+                ];
+
+                $ch = curl_init($url);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+                $result = curl_exec($ch);
+                curl_close($ch);
+
+                return json_decode($result, true);
+            } catch (Exception $e) {
+                return [];
+            }
+        });
     }
 
     /**
@@ -157,26 +218,6 @@ class RemoteRepository extends MainRepositoryAbstract
     }
 
     /**
-     * Get official developers and groups.
-     *
-     * @param null $module
-     *
-     * @return array
-     */
-    protected function getDevelopers($module = null)
-    {
-        $authors = [];
-        if (!empty($module)) {
-            $authors = $module->get('packages-authors', null);
-            foreach ($authors as $uid => $author) {
-                $authors[$uid] = preg_replace('/\\*name\\*/ims', $author, self::REPO_USER_LINK);
-            }
-        }
-
-        return $authors;
-    }
-
-    /**
      * Get module info by module file
      *
      * @param null $url
@@ -185,17 +226,6 @@ class RemoteRepository extends MainRepositoryAbstract
     public function getModuleInfo($url = null)
     {
         return $this->getRepoFileContent($url . self::REPO_MODULE_LINK_MODULE_CONTENT);
-    }
-
-    /**
-     * Get module composer data
-     *
-     * @param null $url
-     * @return array|mixed
-     */
-    public function getComposerInfo($url = null)
-    {
-        return $this->getRepoFileContent($url . self::REPO_MODULE_LINK_COMPOSER_CONTENT);
     }
 
     /**
@@ -222,52 +252,27 @@ class RemoteRepository extends MainRepositoryAbstract
     }
 
     /**
-     * Get official modules and all forks.
+     * Get module composer data
      *
-     * @param array $authors
-     * @param null  $module
-     *
-     * @return array
+     * @param null $url
+     * @return array|mixed
      */
-    protected function getMainModules($authors = [], $module = null, $local = true)
+    public function getComposerInfo($url = null)
     {
-        $modules = [];
-        if (!empty($authors) && !empty($module)) {
-            $tag = $module->get('packages-tag', null);
+        return $this->getRepoFileContent($url . self::REPO_MODULE_LINK_COMPOSER_CONTENT);
+    }
 
-            foreach ($authors as $author) {
-                if ($local) {
-                    return $this->getLocalData();
-                }
-
-                $result = $this->getGitData($author);
-                if (!empty($result)) {
-                    foreach ($result as $repo) {
-                        if (isset($repo['description']) && preg_match('/\#'.$tag.'/', $repo['description'])) {
-                            $release = $this->getLastRelease($repo['url'], $repo);
-                            $model_info = $this->getModuleInfo($repo['url']);
-                            $composer_info = $this->getComposerInfo($repo['url']);
-
-                            $modules[] = [
-                                'name' => $repo['name'],
-                                'vendor' => $repo['owner']['login'],
-                                'description' => preg_replace('/^[^\s]+/imus', '', $repo['description']),
-                                'release' => $release,
-                                'url' => $repo['html_url'],
-                                'forks' => ($repo['forks']) ? $repo['forks_url'] : null,
-                                'module_info' => $model_info,
-                                'composer_info' => $composer_info,
-                                'is_official' => true,
-                                'installed' => false,
-                                'enabled' => false
-                            ];
-                        }
-                    }
-                }
-            }
+    /**
+     * {@inheritdoc}
+     */
+    public function getUnofficialPackages()
+    {
+        if (empty($this->modules[self::PACKAGE_UNOFFICIAL])) {
+            $modules = $this->getRepositories()[self::PACKAGE_OFFICIAL];
+            $this->modules[self::PACKAGE_UNOFFICIAL] = $this->getForksModules($modules);
         }
 
-        return $modules;
+        return $this->modules[self::PACKAGE_UNOFFICIAL];
     }
 
     /**

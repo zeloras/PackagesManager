@@ -2,25 +2,25 @@
     <thead>
     <tr>
         <th>
-            {{ \Translate::get('module_packagesmanager::admin/main.title') }}
+            {{ Translate::get('module_packagesmanager::admin/main.title') }}
         </th>
         <th>
-            {{ \Translate::get('module_packagesmanager::admin/main.description') }}
+            {{ Translate::get('module_packagesmanager::admin/main.description') }}
         </th>
         <th>
-            {{ \Translate::get('module_packagesmanager::admin/main.vendor') }}
+            {{ Translate::get('module_packagesmanager::admin/main.vendor') }}
         </th>
         <th>
-            {{ \Translate::get('module_packagesmanager::admin/main.version') }}
+            {{ Translate::get('module_packagesmanager::admin/main.version') }}
         </th>
         <th>
-            {{ \Translate::get('module_packagesmanager::admin/main.installed') }}
+            {{ Translate::get('module_packagesmanager::admin/main.installed') }}
         </th>
         <th>
-            {{ \Translate::get('module_packagesmanager::admin/main.enabled') }}
+            {{ Translate::get('module_packagesmanager::admin/main.enabled') }}
         </th>
         <th>
-            {{ \Translate::get('module_packagesmanager::admin/main.updated') }}
+            {{ Translate::get('module_packagesmanager::admin/main.updated') }}
         </th>
         <!--<th class="table-icon-cell table-actions"></th>-->
     </tr>
@@ -45,17 +45,21 @@
             <td class="color-blue">
                 @if ($item['installed'])
                     <i class="font-icon font-icon-ok"></i>
-                    <!--<a data-delete="{{ \Translate::get('module_packagesmanager::admin/main.action_module_remove') }}" href="{{ route('admin.packages.change_install', ['module' => $item['module_info']['name']]) }}"></a>-->
+                <!--<a data-delete="{{ Translate::get('module_packagesmanager::admin/main.action_module_remove') }}" href="{{ route('admin.packages.change_install', ['module' => $item['module_info']['name']]) }}"></a>-->
                 @else
                     <i class="font-icon font-icon-del"></i>
-                    <!--<a data-delete="{{ \Translate::get('module_packagesmanager::admin/main.action_module_install') }}" href="{{ route('admin.packages.change_install', ['module' => $item['module_info']['name']]) }}"></a>-->
+                <!--<a data-delete="{{ Translate::get('module_packagesmanager::admin/main.action_module_install') }}" href="{{ route('admin.packages.change_install', ['module' => $item['module_info']['name']]) }}"></a>-->
                 @endif
             </td>
             <td class="color-blue">
                 @if ($item['enabled'])
-                    <a data-delete="{{ \Translate::get('module_packagesmanager::admin/main.action_module_disable') }}" href="{{ route('admin.packages.change_active', ['module' => $item['module_info']['name']]) }}"><i class="font-icon font-icon-ok"></i></a>
+                    <a data-delete="{{ Translate::get('module_packagesmanager::admin/main.action_module_disable') }}"
+                       href="{{ route('admin.packages.change_active', ['module' => $item['module_info']['name']]) }}"><i
+                                class="font-icon font-icon-ok"></i></a>
                 @else
-                    <a data-delete="{{ \Translate::get('module_packagesmanager::admin/main.action_module_enable') }}" href="{{ route('admin.packages.change_active', ['module' => $item['module_info']['name']]) }}"><i class="font-icon font-icon-del"></i></a>
+                    <a data-delete="{{ Translate::get('module_packagesmanager::admin/main.action_module_enable') }}"
+                       href="{{ route('admin.packages.change_active', ['module' => $item['module_info']['name']]) }}"><i
+                                class="font-icon font-icon-del"></i></a>
                 @endif
             </td>
             <td class="table-date">

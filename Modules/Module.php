@@ -13,19 +13,18 @@ class Module extends ChildServiceProvider
     /**
      * {@inheritdoc}
      */
-    public function getCachedServicesPath()
+    public function registerProviders()
     {
-        return Str::replaceLast('services.php', $this->getSnakeName().'_module.php', $this->app->getCachedServicesPath());
+        (new ProviderRepository($this->app, new Filesystem(), $this->getCachedServicesPath()))
+            ->load($this->get('providers', []));
     }
 
     /**
      * {@inheritdoc}
      */
-    public function registerProviders()
+    public function getCachedServicesPath()
     {
-        (new ProviderRepository($this->app, new Filesystem(), $this->getCachedServicesPath()))
-            ->load($this->get('providers', []))
-        ;
+        return Str::replaceLast('services.php', $this->getSnakeName() . '_module.php', $this->app->getCachedServicesPath());
     }
 
     /**

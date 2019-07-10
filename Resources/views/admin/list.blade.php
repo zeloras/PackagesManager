@@ -1,6 +1,6 @@
 @extends('admin.layouts.main')
 
-@section('title', \Translate::get('module_packagesmanager::admin/sidenav.name'))
+@section('title', Translate::get('module_packagesmanager::admin/sidenav.name'))
 
 @section('content')
     {{--<section class="box-typical container">
@@ -23,7 +23,7 @@
         <header class="box-typical-header">
             <div class="tbl-row">
                 <div class="tbl-cell tbl-cell-title">
-                    <h3>{{ \Translate::get('module_packagesmanager::admin/main.packages_list') }}</h3>
+                    <h3>{{ Translate::get('module_packagesmanager::admin/main.packages_list') }}</h3>
                 </div>
             </div>
         </header>
