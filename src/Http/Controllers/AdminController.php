@@ -58,6 +58,8 @@ class AdminController extends Controller
             } else {
                 $find_module->enable();
             }
+
+            \Gcms::syncPermissionsList();
         }
 
         return redirect()->back();
@@ -79,6 +81,8 @@ class AdminController extends Controller
             Packages::findAndInstall($module);
             //install
         }
+
+        \Gcms::syncPermissionsList();
 
         return redirect()->back();
     }

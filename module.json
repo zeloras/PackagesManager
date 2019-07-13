@@ -1,50 +1,50 @@
 {
-  "name": "PackagesManager",
-  "alias": "PackagesManager",
-  "description": "",
-  "keywords": [],
-  "active": 0,
-  "order": -1,
-  "providers": [
-    "GeekCms\\PackagesManager\\Providers\\InitServiceProvider",
-    "GeekCms\\PackagesManager\\Providers\\EventServiceProvider"
-  ],
-  "aliases": [],
-  "files": [
-    "loader.php"
-  ],
-  "requires": [
-    "Nwidart\\Modules"
-  ],
-  "packages-authors": [
-    "zeloras",
-    "ponich",
-    "geekcms"
-  ],
-  "packages-tag": "geekcms-module",
-  "access_permissions": [
-    {
-      "name": "modules_packagesmanager_admin_list",
-      "i18n_name": "access.modules_packagesmanager_admin_list"
-    },
-    {
-      "name": "modules_packagesmanager_admin_disable",
-      "i18n_name": "access.modules_packagesmanager_admin_disable"
-    },
-    {
-      "name": "modules_packagesmanager_admin_remove",
-      "i18n_name": "access.modules_packagesmanager_admin_remove"
-    },
-    {
-      "name": "modules_packagesmanager_admin_install",
-      "i18n_name": "access.modules_packagesmanager_admin_install"
-    }
-  ],
-  "menu_sidebar": [
-    {
-      "i18n_name": null,
-      "route": "packages",
-      "icon": "font-icon font-icon-github"
-    }
-  ]
+    "name": "PackagesManager",
+    "alias": "PackagesManager",
+    "description": "",
+    "keywords": [],
+    "active": 1,
+    "order": -1,
+    "providers": [
+        "GeekCms\\PackagesManager\\Providers\\InitServiceProvider",
+        "GeekCms\\PackagesManager\\Providers\\EventServiceProvider"
+    ],
+    "aliases": [],
+    "files": [
+        "src/loader.php"
+    ],
+    "requires": [
+        "Nwidart\\Modules"
+    ],
+    "packages-authors": [
+        "zeloras",
+        "ponich",
+        "geekcms"
+    ],
+    "packages-tag": "geekcms-module",
+    "access_permissions": [
+        {
+            "name": "modules_packagesmanager_admin_list",
+            "i18n_name": "access.modules_packagesmanager_admin_list"
+        },
+        {
+            "name": "modules_packagesmanager_admin_disable",
+            "i18n_name": "access.modules_packagesmanager_admin_disable"
+        },
+        {
+            "name": "modules_packagesmanager_admin_remove",
+            "i18n_name": "access.modules_packagesmanager_admin_remove"
+        },
+        {
+            "name": "modules_packagesmanager_admin_install",
+            "i18n_name": "access.modules_packagesmanager_admin_install"
+        }
+    ],
+    "menu_sidebar": [
+        {
+            "i18n_name": null,
+            "route": "packages",
+            "icon": "font-icon font-icon-github"
+        }
+    ]
 }

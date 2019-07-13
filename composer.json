@@ -38,10 +38,10 @@
   },
   "autoload": {
     "psr-4": {
-      "GeekCms\\PackagesManager\\": ""
+      "GeekCms\\PackagesManager\\": "src/"
     },
     "files": [
-      "loader.php"
+      "src/loader.php"
     ]
   },
   "minimum-stability": "dev",
