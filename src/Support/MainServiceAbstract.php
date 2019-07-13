@@ -1,25 +1,27 @@
 <?php
 
-namespace GeekCms\PackagesManager\Support\Components;
+
+namespace GeekCms\PackagesManager\Support;
+
 
 use BadMethodCallException;
 use Config;
-use Exception;
 use Gcms;
 use Illuminate\Container\Container;
 use Illuminate\Database\Eloquent\Factory;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\Facades\Validator;
-use Log;
-use Module;
+use Menu;
 use Nwidart\Modules\Module as MainModule;
+use Log;
 use Storage;
+use Module;
 use function call_user_func_array;
 use function count;
 use const DIRECTORY_SEPARATOR;
 
 /**
- * Class CoreComponent.
+ * Class MainServiceAbstract.
  *
  * @method Container getApp()
  * @method Container setApp(Container $app)
@@ -50,29 +52,8 @@ use const DIRECTORY_SEPARATOR;
  * @method string    getResourcesStorageInstance()
  * @method string    setResourcesStorageInstance(Storage $name)
  */
-abstract class CoreComponent extends MainModule
+abstract class MainServiceAbstract extends MainModule implements MainServiceRegistrationInterface, MainServiceInterface
 {
-    /**
-     * This name using for get path to modules from config file.
-     */
-    public const PATH_MODULES = 'modules';
-
-    public const PATH_SRC = 'src/';
-
-    /**
-     * This name using for get path to root/resources from config file.
-     */
-    public const PATH_RESOURCES = 'resources';
-
-    /**
-     * This name using for set log channel.
-     */
-    public const LOGS_CHANNEL = 'modules';
-
-    /**
-     * Path for load config.
-     */
-    public const CONFIG_PATH = 'src/Config/config.php';
     /**
      * Config contain base paths for module components.
      *
@@ -90,70 +71,82 @@ abstract class CoreComponent extends MainModule
         'module_migrations' => self::PATH_SRC . 'Database/Migrations',
         'rules_map' => 'Models\\Validators\\Rules',
     ];
+
     /**
      * Base module name.
      *
      * @var null|string
      */
     protected $module_facade;
+
     /**
      * Main laravel $app.
      *
      * @var null|object
      */
     protected $app;
+
     /**
      * Menu name.
      *
      * @var string
      */
     protected $navname = '';
+
     /**
      * Module name.
      *
      * @var string
      */
     protected $name = 'module';
+
     /**
      * Prefix for configs, settings etc.
      *
      * @var string
      */
     protected $prefix = '';
+
     /**
      * Prefix for admin routes.
      *
      * @var string
      */
     protected $admin_route_prefix = 'admin.';
+
     /**
      * Indicates if loading of the provider is deferred.
      *
      * @var bool
      */
     protected $defer = true;
+
     /**
      * Namespace module name.
      *
      * @var string
      */
     protected $namespace_name = 'Module';
+
     /**
      * Module path from root.
      *
      * @var string
      */
     protected $module_path = '';
+
     /**
      * @internal
      */
     protected $path;
+
     /**
      * Will contain module settings.
      *
      * @var array
      */
     protected $module_config = [];
+
     /**
      * Logs instance.
      *
@@ -176,53 +169,85 @@ abstract class CoreComponent extends MainModule
     protected $resources_storage_instance;
 
     /**
-     * CoreComponent constructor.
-     *
-     * CoreComponent constructor.
-     * @param Container $app
-     * @param null $name
-     * @param null $path
-     * @throws Exception
+     * @inheritDoc
      */
     public function __construct(Container $app, $name = null, $path = null)
     {
-        if (empty($name) && empty($path)) {
-            return false;
+        if (!empty($name) && !empty($path)) {
+            $this->setApp($app);
+            $this->setPrefix(Gcms::MODULES_PREFIX);
+            $this->loadCoreComponents($name);
+            $this->initVariables($this->getName(), $path);
         }
-
-        $this->setApp($app);
-        $this->setPrefix(Gcms::MODULES_PREFIX);
-        $this->loadCoreComponents($name);
-        $this->initVariables($this->getName(), $path);
-
-        parent::__construct($app, $this->getName(), $this->getModulePath());
-        parent::fireEvent('constructor');
-
-        return true;
     }
 
     /**
-     * Load bases components for work with module.
-     *
-     * @param null $main_name
+     * {@inheritdoc}
      */
-    protected function loadCoreComponents($main_name = null)
+    public function boot()
     {
-        $preg_fnc = function ($value) {
+        $this->loadCoreComponents();
+        $this->initVariables($this->getName(), $this->getPath());
+
+        $this->registerConfig();
+        $this->registerFiles();
+        $this->registerAliases();
+        $this->registerProviders();
+        $this->registerFacades();
+
+        $this->registerTranslations();
+        $this->registerRoutes();
+        $this->registerFactories();
+        $this->registerMigrations();
+        $this->registerBladeDirective();
+        $this->registerViews();
+        $this->registerValidationRules();
+    }
+    /**
+     * {@inheritdoc}
+     */
+    public function register(string $main_name = null)
+    {
+        $this->loadCoreComponents($main_name);
+        $this->initVariables($this->getName(), $this->getPath());
+
+        $this->registerConfig();
+        $this->registerFiles();
+        $this->registerAliases();
+        $this->registerProviders();
+        $this->registerFacades();
+
+        $this->registerTranslations();
+        $this->registerRoutes();
+        $this->registerFactories();
+        $this->registerMigrations();
+        $this->registerBladeDirective();
+        $this->registerViews();
+        $this->registerNavigation();
+        $this->registerValidationRules();
+    }
+
+
+    /**
+     * {@inheritdoc}
+     */
+    public function loadCoreComponents(string $main_name = null): void
+    {
+        $preg_fnc = static function ($value) {
             return preg_replace('/' . preg_quote(base_path(), DIRECTORY_SEPARATOR) . '\\/|\\/\*$/uims', '', $value);
         };
-        $this->setName((empty($main_name)) ? $this->getName() : strtolower($main_name));
+        $this->setName(empty($main_name) ? $this->getName() : strtolower($main_name));
         $disk_name = $this::PATH_MODULES;
 
         if (class_exists('Module')) {
             $module_path = Module::getModulePath($this->getName());
-            $scaned_paths = array_map(function ($val) use ($module_path, $preg_fnc) {
+            $scaned_paths = array_map(static function ($val) use ($module_path, $preg_fnc) {
                 $preg_path = $preg_fnc($val);
-                $preg_module = $preg_fnc(dirname($module_path, 1));
+                $preg_module = $preg_fnc(dirname($module_path, self::PARENT_LEVEL_DIR));
                 return ($preg_path === $preg_module) ? strtolower($preg_module) : null;
             }, Module::getScanPaths());
 
-            $real_path = array_filter($scaned_paths, function ($value) {
+            $real_path = array_filter($scaned_paths, static function ($value) {
                 return !empty($value);
             });
 
@@ -249,14 +274,10 @@ abstract class CoreComponent extends MainModule
     }
 
     /**
-     * Init main module data, like a name or root path.
-     *
-     * @param string $name
-     * @param string $path
-     *
+     * {@inheritdoc}
      * @throws Exception
      */
-    protected function initVariables($name = null, $path = null)
+    public function initVariables(string $name = null, string $path = null): void
     {
         try {
             if (empty($name) && empty($path)) {
@@ -265,14 +286,13 @@ abstract class CoreComponent extends MainModule
                 preg_match_all('/(?<module>' . $name . ')$/ims', $path, $module_names);
             }
 
-            $this->setNamespaceName((isset($module_names['module'][0])) ? $module_names['module'][0] : $this->getNamespaceName());
+            $this->setNamespaceName($module_names['module'][0] ?? $this->getNamespaceName());
             $this->setPath($this->getModuleStorageInstance()->path($this->getNamespaceName()) . DIRECTORY_SEPARATOR);
             $this->setName(strtolower($this->getNamespaceName()));
             $this->setModulePath($this->getPath());
             $this->setNavname($this->getPrefix() . $this->getName() . '::');
         } catch (Exception $e) {
             $this->getModuleLogs()->error($e);
-
             throw new Exception($e);
         }
     }
@@ -282,26 +302,27 @@ abstract class CoreComponent extends MainModule
      *
      * @param null $variable
      * @param array $params
+     * @throws BadMethodCallException
      *
      * @return mixed
      */
     public function __call($variable = null, $params = [])
     {
         $filter = preg_replace('/^get|^set/', '', $variable);
-        $filter_under = preg_replace_callback('/_([^_]+)/imus', function ($m) {
+        $filter_under = preg_replace_callback('/_([^_]+)/mu', function ($m) {
             return ucfirst($m[1]);
         }, $filter);
 
-        $filter_upper = preg_replace_callback('/([A-Z]{1})/mus', function ($m) {
+        $filter_upper = preg_replace_callback('/([A-Z]{1})/mu', function ($m) {
             return '_' . lcfirst($m[1]);
         }, $filter);
 
         $filter_upper = preg_replace('/^_/', '', $filter_upper);
 
-        if (!empty($filter_under) && property_exists(self::class, $filter_under) || !empty($filter_upper) && property_exists(self::class, $filter_upper)) {
-            $filter = (property_exists(self::class, $filter_under)) ? $filter_under : $filter_upper;
+        if ((!empty($filter_under) && property_exists(self::class, $filter_under)) || (!empty($filter_upper) && property_exists(self::class, $filter_upper))) {
+            $filter = property_exists(self::class, $filter_under) ? $filter_under : $filter_upper;
 
-            if (count($params) && preg_match('/^set/', $variable)) {
+            if (count($params) && 0 === strpos($variable, 'set')) {
                 $this->{$filter} = $params[array_keys($params)[0]];
             }
 
@@ -316,36 +337,9 @@ abstract class CoreComponent extends MainModule
     }
 
     /**
-     * Main boot init.
+     * {@inheritdoc}
      */
-    public function boot()
-    {
-        $this->loadCoreComponents();
-        $this->initVariables($this->getName(), $this->getPath());
-
-        $this->registerConfig();
-        $this->registerFiles();
-        $this->registerAliases();
-        $this->registerProviders();
-        $this->registerFacades();
-
-        $this->registerTranslations();
-        $this->registerRoutes();
-        $this->registerFactories();
-        $this->registerMigrations();
-        $this->registerBladeDirective();
-        $this->registerViews();
-        $this->registerValidationRules();
-
-        parent::fireEvent('boot');
-    }
-
-    /**
-     * Registration module config.
-     *
-     * @throws Exception
-     */
-    public function registerConfig()
+    public function registerConfig(): void
     {
         $config_path = $this->getModulePath() . $this::CONFIG_PATH;
         if ($this->is_exists($this::CONFIG_PATH, ['is_file' => true])) {
@@ -382,7 +376,7 @@ abstract class CoreComponent extends MainModule
      * @return bool
      * @throws Exception
      */
-    protected function is_exists(string $path = '', array ...$args)
+    protected function is_exists(string $path = '', array ...$args): bool
     {
         $is_file = false;
         $create_dir = false;
@@ -430,7 +424,7 @@ abstract class CoreComponent extends MainModule
             }
         }
 
-        $status = ($is_file && $that_file || !$is_file && $that_dir);
+        $status = ($is_file && $that_file) || (!$is_file && $that_dir);
 
         if ($exception && (!$exists || !$status)) {
             $this->getModuleLogs()->error($exception_message);
@@ -442,11 +436,9 @@ abstract class CoreComponent extends MainModule
     }
 
     /**
-     * For include helpers or something else.
-     *
-     * @throws Exception
+     * {@inheritdoc}
      */
-    public function registerFiles()
+    public function registerFiles(): void
     {
         try {
             $files = $this->get('files', []);
@@ -466,7 +458,7 @@ abstract class CoreComponent extends MainModule
     /**
      * {@inheritdoc}
      */
-    public function registerAliases()
+    public function registerAliases(): void
     {
         try {
             $aliases = $this->get('aliases', []);
@@ -485,21 +477,12 @@ abstract class CoreComponent extends MainModule
     /**
      * {@inheritdoc}
      */
-    public function registerProviders()
-    {
-    }
+    public function registerProviders(): void {}
 
     /**
-     * For register module facades.
+     * {@inheritdoc}
      */
-    public function registerFacades()
-    {
-    }
-
-    /**
-     * Register translations.
-     */
-    public function registerTranslations()
+    public function registerTranslations(): void
     {
         $langModulePath = $this->getModulePath() . self::$components_path['module_lang'];
 
@@ -509,11 +492,9 @@ abstract class CoreComponent extends MainModule
     }
 
     /**
-     * Register routes.
-     *
-     * @throws Exception
+     * {@inheritdoc}
      */
-    public function registerRoutes()
+    public function registerRoutes(): void
     {
         $path_routes = $this->getModulePath() . self::$components_path['module_routes'];
         if (!app()->routesAreCached()) {
@@ -524,27 +505,21 @@ abstract class CoreComponent extends MainModule
     }
 
     /**
-     * Registration module factories.
-     *
-     * @throws Exception
+     * {@inheritdoc}
      */
-    public function registerFactories()
+    public function registerFactories(): void
     {
         $factory_path = $this->getModulePath() . self::$components_path['module_factories'];
 
-        if ($this->is_exists(self::$components_path['module_factories'])) {
-            if (!app()->environment('production')) {
-                app(Factory::class)->load($factory_path);
-            }
+        if ($this->is_exists(self::$components_path['module_factories']) && !app()->environment('production')) {
+            app(Factory::class)->load($factory_path);
         }
     }
 
     /**
-     * Load module migrations.
-     *
-     * @throws Exception
+     * {@inheritdoc}
      */
-    public function registerMigrations()
+    public function registerMigrations(): void
     {
         $migration_path = $this->getModulePath() . self::$components_path['module_migrations'];
         if ($this->is_exists(self::$components_path['module_migrations'])) {
@@ -553,18 +528,14 @@ abstract class CoreComponent extends MainModule
     }
 
     /**
-     * Registration blade directive.
+     * {@inheritdoc}
      */
-    public function registerBladeDirective()
-    {
-    }
+    public function registerBladeDirective(): void {}
 
     /**
-     * Register views.
-     *
-     * @throws Exception
+     * {@inheritdoc}
      */
-    public function registerViews()
+    public function registerViews(): void
     {
         $view_path_main = resource_path(self::$components_path['main_view'] . $this->getName());
         $view_path_module = $this->getModulePath() . self::$components_path['module_view'];
@@ -581,70 +552,110 @@ abstract class CoreComponent extends MainModule
     }
 
     /**
-     * Register validation rules.
+     * {@inheritdoc}
      */
-    protected function registerValidationRules()
+    public function registerValidationRules(): void
     {
-        $basenamespace = ucfirst(self::PATH_MODULES) . '\\' . $this->getNamespaceName() . '\\' . self::$components_path['rules_map'];
+        $base_namespace = ucfirst(self::PATH_MODULES) . '\\' . $this->getNamespaceName() . '\\' . self::$components_path['rules_map'];
 
-        if (class_exists($basenamespace)) {
-            Validator::resolver(function ($translator, $data, $rules, $messages) use ($basenamespace) {
-                return new $basenamespace($translator, $data, $rules, $messages);
+        if (class_exists($base_namespace)) {
+            Validator::resolver(static function ($translator, $data, $rules, $messages) use ($base_namespace) {
+                return new $base_namespace($translator, $data, $rules, $messages);
             });
         }
     }
 
     /**
-     * Method for register module.
-     *
-     * @param null $main_name
+     * {@inheritdoc}
+     */
+    public function registerNavigation(): void
+    {
+        $menu = $this->getMenu();
+
+        if ($adminSidenav = Menu::instance('admin.sidenav')) {
+            if ($menu && count($menu)) {
+                foreach ($menu as $menu_item) {
+                    $route = !empty($menu_item['route']) ? $menu_item['route'] : $this->getName();
+                    $icon = !empty($menu_item['icon']) ? $menu_item['icon'] : 'fa fa-fw fa-comments-o';
+                    $name = !empty($menu_item['i18n_name']) ? $menu_item['i18n_name'] : 'admin/sidenav.name';
+
+                    if (isset($menu_item['child']) && count($menu_item['child'])) {
+                        $adminSidenav->dropdown(
+                            $this->getNavname() . $name,
+                            function ($sub) use ($menu_item) {
+                                foreach ($menu_item['child'] as $menu_child) {
+                                    $route = !empty($menu_child['route']) ? $menu_child['route'] : $this->getName();
+                                    $icon = !empty($menu_child['icon']) ? $menu_child['icon'] : 'fa fa-fw fa-comments-o';
+                                    $name = !empty($menu_child['i18n_name']) ? $menu_child['i18n_name'] : 'admin/sidenav.name';
+
+                                    $sub->route($this->getAdminRoutePrefix() . $route, $this->getNavname() . $name, null, [
+                                        'icon' => $icon,
+                                    ]);
+                                }
+                            },
+                            null,
+                            ['icon' => $icon]
+                        );
+                    } elseif (!isset($menu_item['child']) || !count($menu_item['child'])) {
+                        $adminSidenav->route($this->getAdminRoutePrefix() . $route, $this->getNavname() . $name, null, [
+                            'icon' => $icon,
+                        ]);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * {@inheritdoc}
      * @throws Exception
      */
-    public function register($main_name = null)
+    public function registerFacades(): void
     {
-        $this->loadCoreComponents($main_name);
-        $this->initVariables($this->getName(), $this->getPath());
+        /**
+         * Try load and set alias for "light" version, light version it's like a helper.
+         */
+        $config = $this->getModuleConfig();
+        $loader = AliasLoader::getInstance();
+        if (is_array($config) && isset($config['FacadeName']['alias'])) {
+            try {
+                $path = base_path(ucfirst(self::PATH_MODULES));
+                $aliasName = $config['FacadeName']['alias'];
+                $facadeClass = get_class(new $config['FacadeName']['facadePath']());
+                $repoClass = $config['FacadeName']['mainRepoPath'];
 
-        $this->registerConfig();
-        $this->registerFiles();
-        $this->registerAliases();
-        $this->registerProviders();
-        $this->registerFacades();
+                if (!class_exists($aliasName)) {
+                    if (method_exists($repoClass, 'getInstance')) {
+                        $this->app->bind($aliasName, static function ($app) use ($repoClass) {
+                            return (new $repoClass())::getInstance();
+                        });
+                        $this->app->instance(get_class(new $repoClass()), $repoClass::getInstance());
+                        $loader->alias($facadeClass, $aliasName);
+                        class_alias($facadeClass, $aliasName);
+                    } else {
+                        $this->app->bind($aliasName, static function ($app) use ($repoClass, $path) {
+                            return new $repoClass($app, $path);
+                        });
 
-        $this->registerTranslations();
-        $this->registerRoutes();
-        $this->registerFactories();
-        $this->registerMigrations();
-        $this->registerBladeDirective();
-        $this->registerViews();
-        $this->registerNavigation();
-        $this->registerValidationRules();
-        parent::fireEvent('register');
+                        $this->app->singleton($aliasName, static function ($app) use ($repoClass, $path) {
+                            return new $repoClass($app, $path);
+                        });
+                        $loader->alias($facadeClass, $aliasName);
+                        class_alias($facadeClass, $aliasName);
+                    }
+                }
+            } catch (Exception $e) {
+                $this->getModuleLogs()->error($e);
+
+                throw new Exception($e);
+            }
+        }
     }
 
     /**
-     * Register menu item in admin sidebar.
+     * {@inheritdoc}
      */
-    public function registerNavigation()
-    {
-    }
-
-    /**
-     * Get menu data.
-     *
-     * @return string
-     */
-    public function getMenu()
-    {
-        return $this->get('menu_sidebar', null);
-    }
-
-    /**
-     * Get all unresolved requirements which don't initialized.
-     *
-     * @return array
-     */
-    public function getUnresolvedRequirements()
+    public function getUnresolvedRequirements(): array
     {
         $requirements = [];
         $aliases = $this->getRequires();
@@ -659,11 +670,19 @@ abstract class CoreComponent extends MainModule
 
     /**
      * {@inheritdoc}
-     *
-     * @return string
      */
-    public function getCachedServicesPath()
+    public function getCachedServicesPath(): string
     {
         return $this->getApp()->getCachedServicesPath();
+    }
+
+    /**
+     * Get menu data.
+     *
+     * @return array
+     */
+    public function getMenu(): array
+    {
+        return $this->get('menu_sidebar', []);
     }
 }

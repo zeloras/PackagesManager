@@ -2,13 +2,13 @@
 
 namespace GeekCms\PackagesManager\Modules;
 
-use GeekCms\PackagesManager\Support\Components\ChildServiceProvider;
+use GeekCms\PackagesManager\Support\MainServiceProvider;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Foundation\ProviderRepository;
 use Illuminate\Support\Str;
 
-class Module extends ChildServiceProvider
+class Module extends MainServiceProvider
 {
     /**
      * {@inheritdoc}

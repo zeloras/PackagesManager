@@ -14,7 +14,7 @@ class InitServiceProvider extends MainServiceProvider
     /**
      * {@inheritdoc}
      */
-    public function registerNavigation()
+    public function registerNavigation(): void
     {
         Menu::create('admin.sidenav', function ($menu) {
             $menu->setPresenter(AdminSidenav::class);

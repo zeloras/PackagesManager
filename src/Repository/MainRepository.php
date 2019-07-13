@@ -5,7 +5,7 @@ namespace GeekCms\PackagesManager\Repository;
 use Gcms;
 use GeekCms\PackagesManager\Modules\Module;
 use GeekCms\PackagesManager\Repository\Components\ManageLocalPackage;
-use GeekCms\PackagesManager\Support\Components\ChildServiceProvider;
+use GeekCms\PackagesManager\Support\MainServiceProvider;
 use Illuminate\Container\Container;
 use Nwidart\Modules\Exceptions\ModuleNotFoundException;
 use Nwidart\Modules\FileRepository;
@@ -29,7 +29,7 @@ class MainRepository extends FileRepository
     {
         // @todo fixit
         $this->app = $app;
-        $this->path = (!empty($path)) ? $path : base_path(ucfirst(ChildServiceProvider::PATH_MODULES));
+        $this->path = (!empty($path)) ? $path : base_path(ucfirst(MainServiceProvider::PATH_MODULES));
         $this->main_repo_app = new RemoteRepository($this->app, $this->path, $this);
         parent::__construct($app, $path);
     }

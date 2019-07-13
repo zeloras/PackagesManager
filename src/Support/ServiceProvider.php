@@ -3,15 +3,14 @@
 namespace GeekCms\PackagesManager\Support;
 
 use Config;
-use GeekCms\PackagesManager\Support\Components\ChildServiceProvider;
 use function is_array;
 
 /**
  * Class ServiceProvider.
  */
-class ServiceProvider extends ChildServiceProvider
+class ServiceProvider extends MainServiceProvider
 {
-    public function registerConfig()
+    public function registerConfig(): void
     {
         parent::registerConfig();
         $module_config = Config::get($this->getPrefix() . $this->getName(), []);
