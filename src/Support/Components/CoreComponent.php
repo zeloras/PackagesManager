@@ -57,6 +57,8 @@ abstract class CoreComponent extends MainModule
      */
     const PATH_MODULES = 'modules';
 
+    const PATH_SRC = 'src/';
+
     /**
      * This name using for get path to root/resources from config file.
      */
@@ -70,7 +72,7 @@ abstract class CoreComponent extends MainModule
     /**
      * Path for load config.
      */
-    const CONFIG_PATH = 'Config/config.php';
+    const CONFIG_PATH = 'src/Config/config.php';
     /**
      * Config contain base paths for module components.
      *
@@ -79,13 +81,13 @@ abstract class CoreComponent extends MainModule
     public static $components_path = [
         'modules' => self::PATH_MODULES,
         'resources' => self::PATH_RESOURCES,
-        'main_lang' => 'lang/modules/',
-        'main_view' => 'views/modules/',
-        'module_routes' => 'Http/routes.php',
-        'module_lang' => 'Resources/lang',
-        'module_view' => 'Resources/views',
-        'module_factories' => 'Database/factories',
-        'module_migrations' => 'Database/Migrations',
+        'main_lang' => self::PATH_SRC . 'lang/modules/',
+        'main_view' => self::PATH_SRC . 'views/modules/',
+        'module_routes' => self::PATH_SRC . 'Http/routes.php',
+        'module_lang' => self::PATH_SRC . 'Resources/lang',
+        'module_view' => self::PATH_SRC . 'Resources/views',
+        'module_factories' => self::PATH_SRC . 'Database/factories',
+        'module_migrations' => self::PATH_SRC . 'Database/Migrations',
         'rules_map' => 'Models\\Validators\\Rules',
     ];
     /**
