@@ -103,10 +103,8 @@ abstract class FileRepository implements RepositoryInterface, Countable
     /**
      * Creates a new Module instance
      *
-     * @param Container $app
-     * @param $name
-     * @param $path
-     * @return \Nwidart\Modules\Module
+     * @param mixed ...$args
+     * @return mixed
      */
     abstract protected function createModule(...$args);
 

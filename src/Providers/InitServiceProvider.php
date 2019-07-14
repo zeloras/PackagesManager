@@ -25,16 +25,24 @@ class InitServiceProvider extends MainServiceProvider
      */
     public function boot()
     {
-        $this->registerNamespaces();
-        $this->registerModules();
+        if (!empty($this->getName()) && !empty($this->getPath())) {
+            parent::boot();
+        } else {
+            $this->registerNamespaces();
+            $this->registerModules();
+        }
     }
     /**
      * Register the service provider.
      */
     public function register(string $name = null)
     {
-        $this->registerServices();
-        $this->registerProviders();
+        if (!empty($this->getName()) && !empty($this->getPath())) {
+            parent::register($name);
+        } else {
+            $this->registerServices();
+            $this->registerProviders();
+        }
     }
 
     /**
@@ -47,6 +55,7 @@ class InitServiceProvider extends MainServiceProvider
             return new MainRepository($app, $path);
         });
         $this->app->alias(RepositoryInterface::class, 'modules');
+        //$this->registerFacades();
     }
 
     /**

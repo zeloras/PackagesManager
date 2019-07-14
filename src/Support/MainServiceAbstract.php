@@ -16,7 +16,7 @@ use Menu;
 use GeekCms\PackagesManager\Modules\ModuleAbstract;
 use Log;
 use Storage;
-use Module;
+use PackageSystem;
 use function call_user_func_array;
 use function count;
 use const DIRECTORY_SEPARATOR;
@@ -180,6 +180,8 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
             $this->loadCoreComponents($name);
             $this->initVariables($this->getName(), $path);
         }
+
+        parent::__construct($app, $name, $path);
     }
 
     /**
@@ -240,13 +242,13 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
         $this->setName(empty($main_name) ? $this->getName() : strtolower($main_name));
         $disk_name = $this::PATH_MODULES;
 
-        if (class_exists('Module')) {
-            $module_path = Module::getModulePath($this->getName());
+        if (class_exists('PackageSystem')) {
+            $module_path = PackageSystem::getModulePath($this->getName());
             $scaned_paths = array_map(static function ($val) use ($module_path, $preg_fnc) {
                 $preg_path = $preg_fnc($val);
                 $preg_module = $preg_fnc(dirname($module_path, self::PARENT_LEVEL_DIR));
                 return ($preg_path === $preg_module) ? strtolower($preg_module) : null;
-            }, Module::getScanPaths());
+            }, PackageSystem::getScanPaths());
 
             $real_path = array_filter($scaned_paths, static function ($value) {
                 return !empty($value);
@@ -558,7 +560,6 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
     public function registerValidationRules(): void
     {
         $base_namespace = ucfirst(self::PATH_MODULES) . '\\' . $this->getNamespaceName() . '\\' . self::$components_path['rules_map'];
-
         if (class_exists($base_namespace)) {
             Validator::resolver(static function ($translator, $data, $rules, $messages) use ($base_namespace) {
                 return new $base_namespace($translator, $data, $rules, $messages);
@@ -619,6 +620,7 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
         $config = $this->getModuleConfig();
         $loader = AliasLoader::getInstance();
         if (is_array($config) && isset($config['FacadeName']['alias'])) {
+
             try {
                 $path = base_path(ucfirst(self::PATH_MODULES));
                 $aliasName = $config['FacadeName']['alias'];
@@ -630,6 +632,7 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
                         $this->app->bind($aliasName, static function ($app) use ($repoClass) {
                             return (new $repoClass())::getInstance();
                         });
+
                         $this->app->instance(get_class(new $repoClass()), $repoClass::getInstance());
                         $loader->alias($facadeClass, $aliasName);
                         class_alias($facadeClass, $aliasName);
@@ -700,10 +703,12 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
      */
     protected function registerNamespaces()
     {
-        $configPath = __DIR__ . '/../config/config.php';
-        $this->mergeConfigFrom($configPath, 'modules');
-        $this->publishes([
-            $configPath => config_path('modules.php'),
-        ], 'config');
+        $configPath = dirname(__DIR__, self::PARENT_LEVEL_DIR) . '/Config/modules.php';
+        if (file_exists($configPath)) {
+            $this->mergeConfigFrom($configPath, 'modules');
+            $this->publishes([
+                $configPath => config_path('modules.php'),
+            ], 'config');
+        }
     }
 }

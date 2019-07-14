@@ -3,13 +3,17 @@
 namespace GeekCms\PackagesManager\Support;
 
 use Config;
+use GeekCms\PackagesManager\Providers\MainServiceProviderInterface;
 use function is_array;
 
 /**
  * Class ServiceProvider.
  */
-class ServiceProvider extends MainServiceProvider
+class ServiceProvider extends MainServiceProvider  implements MainServiceProviderInterface
 {
+    /**
+     * @inheritDoc
+     */
     public function registerConfig(): void
     {
         parent::registerConfig();
@@ -22,5 +26,21 @@ class ServiceProvider extends MainServiceProvider
             $this->setModuleConfig($module_config);
             $module_config = null;
         }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function mainInit(array ...$args)
+    {
+        $instance = static::class;
+        if (class_exists($instance)) {
+            $instance = new $instance(...$args[0]);
+            call_user_func_array([$instance, 'register'], []);
+        } else {
+            $instance = null;
+        }
+
+        return $instance;
     }
 }

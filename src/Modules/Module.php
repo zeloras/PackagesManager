@@ -2,6 +2,7 @@
 
 namespace GeekCms\PackagesManager\Modules;
 
+use GeekCms\PackagesManager\Support\MainServiceProvider;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Foundation\ProviderRepository;
@@ -35,5 +36,24 @@ class Module extends ModuleAbstract
         foreach ($this->get('aliases', []) as $aliasName => $aliasClass) {
             $loader->alias($aliasName, $aliasClass);
         }
+    }
+
+    /**
+     * For call all module providers in one "template"
+     *
+     * @return |null
+     */
+    public function registerInit()
+    {
+        $provider_called = null;
+        $providers = $this->get('providers', []);
+        foreach ($providers as $provider) {
+            $main_provider = $provider::mainInit([$this->getLaravel(), $this->getName(), $this->getPath()]);
+            if (!empty($main_provider)) {
+                $provider_called = $main_provider;
+            }
+        }
+
+        return $provider_called;
     }
 }

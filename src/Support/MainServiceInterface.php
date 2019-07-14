@@ -10,6 +10,7 @@ interface MainServiceInterface
      * Level for dirname
      */
     public const PARENT_LEVEL_DIR = 1;
+    public const PARENT_LEVEL_DIR_2ND = 2;
 
     /**
      * Load core components

@@ -2,8 +2,8 @@
 
 return [
     'FacadeName' => [
-        'alias' => 'Packages',
-        'facadePath' => 'GeekCms\PackagesManager\Facades\Packages',
+        'alias' => 'modules',
+        'facadePath' => 'GeekCms\PackagesManager\Facades\PackageSystem',
         'mainRepoPath' => 'GeekCms\PackagesManager\Repository\MainRepository',
     ],
 ];

@@ -3,12 +3,13 @@
 namespace GeekCms\PackagesManager\Repository;
 
 use Gcms;
+use PackageSystem;
 use GeekCms\PackagesManager\Modules\Module;
 use GeekCms\PackagesManager\Support\MainServiceProvider;
 use Illuminate\Container\Container;
 use GeekCms\PackagesManager\Exceptions\ModuleNotFoundException;
 
-class MainRepository extends FileRepository
+class MainRepository extends MainRepositoryAbstract
 {
     /**
      * Var with RemoteRepository instance
@@ -27,7 +28,7 @@ class MainRepository extends FileRepository
     {
         // @todo fixit
         $this->app = $app;
-        $this->path = (!empty($path)) ? $path : base_path(ucfirst(MainServiceProvider::PATH_MODULES));
+        $this->path = !empty($path) ? $path : base_path(ucfirst(MainServiceProvider::PATH_MODULES));
         $this->main_repo_app = new RemoteRepository($this->app, $this->path, $this);
         parent::__construct($app, $path);
     }
@@ -41,7 +42,7 @@ class MainRepository extends FileRepository
      */
     public function listByPriority()
     {
-        $local_modules = \Module::allEnabled();
+        $local_modules = PackageSystem::allEnabled();
 
         $sorted = $this->sortModulesListPriority($local_modules);
         $preload_modules = [];
@@ -84,11 +85,11 @@ class MainRepository extends FileRepository
          *
          * @return null|string|string[]
          */
-        $trims = function ($namespace = '', int $size = 1) {
+        $trims = static function ($namespace = '', int $size = 1) {
             if (!empty($namespace)) {
                 preg_match_all('/^(?<module>([^\\\]+\\\){' . $size . '})/imus', $namespace, $find);
                 if (isset($find['module'][0]) && !empty($find['module'][0])) {
-                    $namespace = preg_replace('/\\\$/ims', '', $find['module'][0]);
+                    $namespace = preg_replace('/\\\$/m', '', $find['module'][0]);
                 }
             }
 
@@ -96,13 +97,13 @@ class MainRepository extends FileRepository
         };
 
         // Sort array by load "weight"
-        uasort($modules, function ($a, $b) use ($sorted_list, $trims) {
+        uasort($modules, static function ($a, $b) use ($sorted_list, $trims) {
             $amin = $bmin = 0;
             if (!empty($sorted_list)) {
                 $left_path = $trims($a->get('providers', [null])[0], 2);
                 $right_path = $trims($b->get('providers', [null])[0], 2);
-                $amin = (isset($sorted_list[$left_path])) ? $sorted_list[$left_path] : 0;
-                $bmin = (isset($sorted_list[$right_path])) ? $sorted_list[$right_path] : 0;
+                $amin = $sorted_list[$left_path] ?? 0;
+                $bmin = $sorted_list[$right_path] ?? 0;
             }
 
             $left = $a->order + $amin;
@@ -132,9 +133,10 @@ class MainRepository extends FileRepository
     {
         $installed = false;
         $handler = $this->main_repo_app->getHandler();
+
         $modules = new $handler($this->main_repo_app->getOfficialPackages());
-        $for_install = array_filter($modules->forInstall(), function ($v) use ($module) {
-            return ($v['module_info']['name'] == $module);
+        $for_install = array_filter($modules->forInstall(), static function ($v) use ($module) {
+            return ($v['module_info']['name'] === $module);
         });
 
         if (count($for_install)) {
@@ -190,7 +192,7 @@ class MainRepository extends FileRepository
      */
     public function getPermissionsList()
     {
-        $local_modules = \Module::allEnabled();
+        $local_modules = PackageSystem::allEnabled();
         $permissions = [];
         foreach ($local_modules as $module) {
             $permissions[$module->name] = $module->get(Gcms::CONFIG_ADMIN_PERMISSION, []);
