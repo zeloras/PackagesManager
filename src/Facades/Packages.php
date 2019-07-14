@@ -16,11 +16,11 @@ class Packages extends Facade
      *
      * @return string
      */
-    protected static function getFacadeAccessor()
+    protected static function getFacadeAccessor(): string
     {
         $returned = null;
         $module_name = giveMeTheModuleName(static::class, null);
-        $settings = Config::get(Gcms::MODULES_PREFIX . strtolower($module_name), null);
+        $settings = Config::get(Gcms::MODULES_PREFIX . strtolower($module_name));
 
         if (empty($settings)) {
             $module_config = module_path($module_name) . DIRECTORY_SEPARATOR . MainServiceProvider::CONFIG_PATH;

@@ -4,11 +4,9 @@ namespace GeekCms\PackagesManager\Repository;
 
 use Gcms;
 use GeekCms\PackagesManager\Modules\Module;
-use GeekCms\PackagesManager\Repository\Components\ManageLocalPackage;
 use GeekCms\PackagesManager\Support\MainServiceProvider;
 use Illuminate\Container\Container;
-use Nwidart\Modules\Exceptions\ModuleNotFoundException;
-use Nwidart\Modules\FileRepository;
+use GeekCms\PackagesManager\Exceptions\ModuleNotFoundException;
 
 class MainRepository extends FileRepository
 {

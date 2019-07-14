@@ -5,8 +5,7 @@ namespace GeekCms\PackagesManager\Repository;
 use Cache;
 use Exception;
 use Gcms;
-use GeekCms\PackagesManager\Repository\Template\MainRepositoryAbstract;
-use Nwidart\Modules\Exceptions\ModuleNotFoundException;
+use GeekCms\PackagesManager\Exceptions\ModuleNotFoundException;
 
 class RemoteRepository extends MainRepositoryAbstract
 {

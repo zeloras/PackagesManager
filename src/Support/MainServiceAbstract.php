@@ -7,12 +7,13 @@ namespace GeekCms\PackagesManager\Support;
 use BadMethodCallException;
 use Config;
 use Gcms;
+use GeekCms\PackagesManager\Providers\BootstrapServiceProvider;
 use Illuminate\Container\Container;
 use Illuminate\Database\Eloquent\Factory;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\Facades\Validator;
 use Menu;
-use Nwidart\Modules\Module as MainModule;
+use GeekCms\PackagesManager\Modules\ModuleAbstract;
 use Log;
 use Storage;
 use Module;
@@ -52,7 +53,7 @@ use const DIRECTORY_SEPARATOR;
  * @method string    getResourcesStorageInstance()
  * @method string    setResourcesStorageInstance(Storage $name)
  */
-abstract class MainServiceAbstract extends MainModule implements MainServiceRegistrationInterface, MainServiceInterface
+abstract class MainServiceAbstract extends ModuleAbstract implements MainServiceRegistrationInterface, MainServiceInterface
 {
     /**
      * Config contain base paths for module components.
@@ -684,5 +685,13 @@ abstract class MainServiceAbstract extends MainModule implements MainServiceRegi
     public function getMenu(): array
     {
         return $this->get('menu_sidebar', []);
+    }
+
+    /**
+     * Register all modules.
+     */
+    protected function registerModules()
+    {
+        $this->app->register(BootstrapServiceProvider::class);
     }
 }
