@@ -24,6 +24,7 @@ if (! function_exists('module_path')) {
         return $module->getPath();
     }
 }
+
 if (! function_exists('config_path')) {
     /**
      * Get the configuration path.
@@ -36,6 +37,7 @@ if (! function_exists('config_path')) {
         return app()->basePath() . '/config' . ($path ? '/' . $path : $path);
     }
 }
+
 if (! function_exists('public_path')) {
     /**
      * Get the path to the public folder.

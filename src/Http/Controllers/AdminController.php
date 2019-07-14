@@ -2,7 +2,7 @@
 
 namespace GeekCms\PackagesManager\Http\Controllers;
 
-use GeekCms\PackagesManager\Facades\Packages;
+use PackageSystem;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
@@ -22,7 +22,7 @@ class AdminController extends Controller
      */
     public function index()
     {
-        $main = Packages::getModulesOfficial();
+        $main = PackageSystem::getModulesOfficial();
         $list = $main->available();
 
         return view('packagesmanager::admin/index', [
@@ -50,9 +50,9 @@ class AdminController extends Controller
      */
     public function changeActive($module = null)
     {
-        $find_module = Packages::has($module);
+        $find_module = PackageSystem::has($module);
         if ($find_module) {
-            $find_module = Packages::find($module);
+            $find_module = PackageSystem::find($module);
             if ($find_module->enabled()) {
                 $find_module->disable();
             } else {
@@ -73,12 +73,12 @@ class AdminController extends Controller
      */
     public function changeInstall($module = null)
     {
-        $find_module = Packages::has($module);
+        $find_module = PackageSystem::has($module);
         if ($find_module) {
-            $find_module = Packages::find($module);
+            $find_module = PackageSystem::find($module);
             $find_module->delete();
         } else {
-            Packages::findAndInstall($module);
+            PackageSystem::findAndInstall($module);
             //install
         }
 

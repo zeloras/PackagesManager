@@ -118,7 +118,6 @@ abstract class FileRepository implements RepositoryInterface, Countable
     public function scan()
     {
         $paths = $this->getScanPaths();
-
         $modules = [];
 
         foreach ($paths as $key => $path) {
@@ -128,7 +127,6 @@ abstract class FileRepository implements RepositoryInterface, Countable
 
             foreach ($manifests as $manifest) {
                 $name = Json::make($manifest)->get('name');
-
                 $modules[$name] = $this->createModule($this->app, $name, dirname($manifest));
             }
         }
