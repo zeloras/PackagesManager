@@ -13,7 +13,7 @@ if (!function_exists('giveMeTheModuleName')) {
     {
         preg_match_all('/([^\\\]+\\\){1}(?<module>.*?)\\\/ims', $class, $module_names);
 
-        return (isset($module_names['module'][0])) ? $module_names['module'][0] : $default;
+        return $module_names['module'][0] ?? $default;
     }
 }
 
@@ -34,7 +34,7 @@ if (! function_exists('config_path')) {
      */
     function config_path($path = '')
     {
-        return app()->basePath() . '/config' . ($path ? '/' . $path : $path);
+        return app()->basePath() . '/config' . ($path ? DIRECTORY_SEPARATOR . $path : $path);
     }
 }
 

@@ -52,7 +52,7 @@ class RemoteRepository extends MainRepositoryAbstract
         if (!empty($module)) {
             $authors = $module->get('packages-authors', null);
             foreach ($authors as $uid => $author) {
-                $authors[$uid] = preg_replace('/\\*name\\*/ims', $author, self::REPO_USER_LINK);
+                $authors[$uid] = preg_replace('/\\*name\\*/im', $author, self::REPO_USER_LINK);
             }
         }
 
@@ -90,10 +90,10 @@ class RemoteRepository extends MainRepositoryAbstract
                             $modules[] = [
                                 'name' => $repo['name'],
                                 'vendor' => $repo['owner']['login'],
-                                'description' => preg_replace('/^[^\s]+/imus', '', $repo['description']),
+                                'description' => preg_replace('/^[\S]+/mu', '', $repo['description']),
                                 'release' => $release,
                                 'url' => $repo['html_url'],
-                                'forks' => ($repo['forks']) ? $repo['forks_url'] : null,
+                                'forks' => $repo['forks'] ? $repo['forks_url'] : null,
                                 'module_info' => $model_info,
                                 'composer_info' => $composer_info,
                                 'is_official' => true,

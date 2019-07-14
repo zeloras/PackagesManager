@@ -15,8 +15,6 @@ abstract class ModuleAbstract extends MainServiceAbstract
 
     /**
      * The laravel|lumen application instance.
-     *
-     * @var \Illuminate\Contracts\Foundation\Application|\Laravel\Lumen\Application
      */
     protected $app;
 
@@ -56,7 +54,6 @@ abstract class ModuleAbstract extends MainServiceAbstract
     /**
      * Get laravel instance.
      *
-     * @return \Illuminate\Contracts\Foundation\Application|\Laravel\Lumen\Application
      */
     public function getLaravel()
     {
@@ -94,26 +91,6 @@ abstract class ModuleAbstract extends MainServiceAbstract
     }
 
     /**
-     * Get name in snake case.
-     *
-     * @return string
-     */
-    public function getSnakeName()
-    {
-        return Str::snake($this->name);
-    }
-
-    /**
-     * Get description.
-     *
-     * @return string
-     */
-    public function getDescription()
-    {
-        return $this->get('description');
-    }
-
-    /**
      * Get alias.
      *
      * @return string
@@ -121,16 +98,6 @@ abstract class ModuleAbstract extends MainServiceAbstract
     public function getAlias()
     {
         return $this->get('alias');
-    }
-
-    /**
-     * Get priority.
-     *
-     * @return string
-     */
-    public function getPriority()
-    {
-        return $this->get('priority');
     }
 
     /**
@@ -172,32 +139,9 @@ abstract class ModuleAbstract extends MainServiceAbstract
      */
     public function boot()
     {
-        if (config('modules.register.translations', true) === true) {
-            $this->registerTranslation();
-        }
-
-        if ($this->isLoadFilesOnBoot()) {
-            $this->registerFiles();
-        }
-
         $this->fireEvent('boot');
     }
 
-    /**
-     * Register module's translation.
-     *
-     * @return void
-     */
-    protected function registerTranslation()
-    {
-        $lowerName = $this->getLowerName();
-
-        $langPath = $this->getPath() . '/Resources/lang';
-
-        if (is_dir($langPath)) {
-            $this->loadTranslationsFrom($langPath, $lowerName);
-        }
-    }
 
     /**
      * Get json contents from the cache, setting as needed.
@@ -208,12 +152,22 @@ abstract class ModuleAbstract extends MainServiceAbstract
      */
     public function json($file = null) : Json
     {
-        if ($file === null) {
+        $path = $this->getPath();
+        if (empty($file)) {
             $file = 'module.json';
+            $file_module = $this->getLowerName() . '_' . $file;
+            $path_storage = storage_path(\Gcms::MODULES_STORAGE_DIR);
+            $full_path = $path_storage . DIRECTORY_SEPARATOR . $file_module;
+            if (!file_exists($full_path) || !is_file($full_path)) {
+                copy($path . DIRECTORY_SEPARATOR . $file, $full_path);
+            }
+
+            $file = $file_module;
+            $path = $path_storage;
         }
 
-        return array_get($this->moduleJson, $file, function () use ($file) {
-            return $this->moduleJson[$file] = new Json($this->getPath() . '/' . $file, $this->app['files']);
+        return array_get($this->moduleJson, $file, function () use ($file, $path) {
+            return $this->moduleJson[$file] = new Json($path . DIRECTORY_SEPARATOR . $file, $this->app['files']);
         });
     }
 
@@ -231,31 +185,10 @@ abstract class ModuleAbstract extends MainServiceAbstract
     }
 
     /**
-     * Get a specific data from composer.json file by given the key.
-     *
-     * @param $key
-     * @param null $default
-     *
-     * @return mixed
-     */
-    public function getComposerAttr($key, $default = null)
-    {
-        return $this->json('composer.json')->get($key, $default);
-    }
-
-    /**
      * Register the module.
      */
     public function register()
     {
-        $this->registerAliases();
-
-        $this->registerProviders();
-
-        if ($this->isLoadFilesOnBoot() === false) {
-            $this->registerFiles();
-        }
-
         $this->fireEvent('register');
     }
 
@@ -267,32 +200,6 @@ abstract class ModuleAbstract extends MainServiceAbstract
     protected function fireEvent($event)
     {
         $this->app['events']->fire(sprintf('modules.%s.' . $event, $this->getLowerName()), [$this]);
-    }
-    /**
-     * Register the aliases from this module.
-     */
-    abstract public function registerAliases();
-
-    /**
-     * Register the service providers from this module.
-     */
-    abstract public function registerProviders();
-
-    /**
-     * Get the path to the cached *_module.php file.
-     *
-     * @return string
-     */
-    abstract public function getCachedServicesPath();
-
-    /**
-     * Register the files from this module.
-     */
-    protected function registerFiles()
-    {
-        foreach ($this->get('files', []) as $file) {
-            include $this->path . '/' . $file;
-        }
     }
 
     /**
@@ -384,18 +291,6 @@ abstract class ModuleAbstract extends MainServiceAbstract
     }
 
     /**
-     * Get extra path.
-     *
-     * @param string $path
-     *
-     * @return string
-     */
-    public function getExtraPath(string $path) : string
-    {
-        return $this->getPath() . '/' . $path;
-    }
-
-    /**
      * Handle call to __get method.
      *
      * @param $key
@@ -405,15 +300,5 @@ abstract class ModuleAbstract extends MainServiceAbstract
     public function __get($key)
     {
         return $this->get($key);
-    }
-
-    /**
-     * Check if can load files of module on boot method.
-     *
-     * @return bool
-     */
-    protected function isLoadFilesOnBoot()
-    {
-        return config('modules.register.files', 'register') === 'boot';
     }
 }

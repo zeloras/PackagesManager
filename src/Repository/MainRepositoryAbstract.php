@@ -11,30 +11,30 @@ abstract class MainRepositoryAbstract extends FileRepository
     /**
      * Constants for filter something or get lists with needed packages.
      */
-    const PACKAGE_OFFICIAL = 'official';
-    const PACKAGE_UNOFFICIAL = 'unofficial';
-    const PACKAGE_INSTALLED_ALL = 'all';
-    const PACKAGE_INSTALLED_ACTIVE = 'installed-active';
-    const PACKAGE_INSTALLED_DISABLED = 'installed-disabled';
-    const PACKAGE_REMOTE_OFFICIAL = 'remote-official';
-    const PACKAGE_REMOTE_UNOFFICIAL = 'remote-unofficial';
+    public const PACKAGE_OFFICIAL = 'official';
+    public const PACKAGE_UNOFFICIAL = 'unofficial';
+    public const PACKAGE_INSTALLED_ALL = 'all';
+    public const PACKAGE_INSTALLED_ACTIVE = 'installed-active';
+    public const PACKAGE_INSTALLED_DISABLED = 'installed-disabled';
+    public const PACKAGE_REMOTE_OFFICIAL = 'remote-official';
+    public const PACKAGE_REMOTE_UNOFFICIAL = 'remote-unofficial';
 
-    const REPO_USER_LINK = 'https://api.github.com/users/*name*/repos';
-    const REPO_GROUP_LINK = 'https://api.github.com/orgs/*name*/repos';
+    public const REPO_USER_LINK = 'https://api.github.com/users/*name*/repos';
+    public const REPO_GROUP_LINK = 'https://api.github.com/orgs/*name*/repos';
 
     /**
      * For github api
      */
-    const REPO_MODULE_LINK_RELEASES = '/releases';
-    const REPO_MODULE_LINK_MODULE_CONTENT = '/contents/module.json';
-    const REPO_MODULE_LINK_COMPOSER_CONTENT = '/contents/composer.json';
+    public const REPO_MODULE_LINK_RELEASES = '/releases';
+    public const REPO_MODULE_LINK_MODULE_CONTENT = '/contents/module.json';
+    public const REPO_MODULE_LINK_COMPOSER_CONTENT = '/contents/composer.json';
 
     /**
      * Key for cache curl responses
      *
      * @var string
      */
-    const CACHED_MODULES_LIST_KEY = 'get_url_cached_modules';
+    public const CACHED_MODULES_LIST_KEY = 'get_url_cached_modules';
 
     /**
      * Load classes for work with remote packages or local(downloaded).

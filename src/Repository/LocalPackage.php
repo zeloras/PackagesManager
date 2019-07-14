@@ -23,11 +23,11 @@ class LocalPackage
     {
         foreach ($this->modules_system as $module) {
             $module_fetch_name = $module->get('name');
-            $modules_where = array_where($this->modules, function ($v) use ($module) {
+            $modules_where = array_where($this->modules, static function ($v) use ($module) {
                 return !empty($v['module_info']['name']) && $v['module_info']['name'] === $module->get('name');
             });
 
-            if (count($modules_where) && !empty($module_fetch_name)) {
+            if (!empty($module_fetch_name) && count($modules_where)) {
                 $first_key = array_key_first($modules_where);
                 $this->modules[$first_key]['installed'] = true;
                 $this->modules[$first_key]['enabled'] = $module->isStatus(1);
@@ -60,11 +60,11 @@ class LocalPackage
      */
     public function available($sort_desc = false)
     {
-        uasort($this->modules, function ($a, $b) use ($sort_desc) {
-            $weight = ($sort_desc) ? 1 : -1;
+        uasort($this->modules, static function ($a, $b) use ($sort_desc) {
+            $weight = $sort_desc ? 1 : -1;
             if ($a['installed'] && $b['installed']) {
-                $weight = ($a['enabled']) ? 1 : -1;
-            } elseif ($a['installed']) {
+                $weight = $a['enabled'] ? 1 : -1;
+            } elseif ($a['installed'] || $b['installed']) {
                 $weight = 1;
             }
 

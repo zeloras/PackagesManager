@@ -4,8 +4,8 @@ namespace GeekCms\PackagesManager\Exceptions;
 
 class InvalidAssetPath extends \Exception
 {
-    public static function missingModuleName($asset)
+    public static function missingPackageName($asset)
     {
-        return new static("Module name was not specified in asset [$asset].");
+        return new static("Package name was not specified in asset [$asset].");
     }
 }

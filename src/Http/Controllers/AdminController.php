@@ -6,7 +6,7 @@ use PackageSystem;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
-use Nwidart\Modules\Exceptions\ModuleNotFoundException;
+use GeekCms\PackagesManager\Exceptions\ModuleNotFoundException;
 
 /**
  * Class AdminController.

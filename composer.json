@@ -32,7 +32,7 @@
         "GeekCms\\PackagesManager\\Providers\\InitServiceProvider"
       ],
       "aliases": {
-        "PackageSystem": "GeekCms\\PackagesManager\\Facades\\Packages"
+        "PackageSystem": "GeekCms\\PackagesManager\\Facades\\PackageSystem"
       }
     }
   },

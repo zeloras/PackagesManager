@@ -93,7 +93,7 @@ abstract class FileRepository implements RepositoryInterface, Countable
             $paths = array_merge($paths, $this->config('scan.paths'));
         }
 
-        $paths = array_map(function ($path) {
+        $paths = array_map(static function ($path) {
             return ends_with($path, '/*') ? $path : str_finish($path, '/*');
         }, $paths);
 
@@ -158,7 +158,7 @@ abstract class FileRepository implements RepositoryInterface, Countable
         $modules = [];
 
         foreach ($cached as $name => $module) {
-            $path = $module["path"];
+            $path = $module['path'];
 
             $modules[$name] = $this->createModule($this->app, $name, $path);
         }
@@ -261,12 +261,12 @@ abstract class FileRepository implements RepositoryInterface, Countable
     {
         $modules = $this->allEnabled();
 
-        uasort($modules, function (Module $a, Module $b) use ($direction) {
-            if ($a->order == $b->order) {
+        uasort($modules, static function (Module $a, Module $b) use ($direction) {
+            if ($a->order === $b->order) {
                 return 0;
             }
 
-            if ($direction == 'desc') {
+            if ($direction === 'desc') {
                 return $a->order < $b->order ? 1 : -1;
             }
 
@@ -318,8 +318,6 @@ abstract class FileRepository implements RepositoryInterface, Countable
                 return $module;
             }
         }
-
-        return;
     }
 
     /**
@@ -334,8 +332,6 @@ abstract class FileRepository implements RepositoryInterface, Countable
                 return $module;
             }
         }
-
-        return;
     }
 
     /**
@@ -375,7 +371,7 @@ abstract class FileRepository implements RepositoryInterface, Countable
             return $module;
         }
 
-        throw new ModuleNotFoundException("Module [{$name}] does not exist!");
+        throw new ModuleNotFoundException("Package [{$name}] does not exist!");
     }
 
     /**
@@ -400,9 +396,9 @@ abstract class FileRepository implements RepositoryInterface, Countable
     public function getModulePath($module)
     {
         try {
-            return $this->findOrFail($module)->getPath() . '/';
+            return $this->findOrFail($module)->getPath() . DIRECTORY_SEPARATOR;
         } catch (ModuleNotFoundException $e) {
-            return $this->getPath() . '/' . Str::studly($module) . '/';
+            return $this->getPath() . DIRECTORY_SEPARATOR . Str::studly($module) . DIRECTORY_SEPARATOR;
         }
     }
 
@@ -415,7 +411,7 @@ abstract class FileRepository implements RepositoryInterface, Countable
      */
     public function assetPath($module) : string
     {
-        return $this->config('paths.assets') . '/' . $module;
+        return $this->config('paths.assets') . DIRECTORY_SEPARATOR . $module;
     }
 
     /**
@@ -514,7 +510,7 @@ abstract class FileRepository implements RepositoryInterface, Countable
     public function asset($asset) : string
     {
         if (str_contains($asset, ':') === false) {
-            throw InvalidAssetPath::missingModuleName($asset);
+            throw InvalidAssetPath::missingPackageName($asset);
         }
         list($name, $url) = explode(':', $asset);
 
@@ -578,38 +574,5 @@ abstract class FileRepository implements RepositoryInterface, Countable
     public function delete($name) : bool
     {
         return $this->findOrFail($name)->delete();
-    }
-
-
-    /**
-     * Get stub path.
-     *
-     * @return string|null
-     */
-    public function getStubPath()
-    {
-        if ($this->stubPath !== null) {
-            return $this->stubPath;
-        }
-
-        if ($this->config('stubs.enabled') === true) {
-            return $this->config('stubs.path');
-        }
-
-        return $this->stubPath;
-    }
-
-    /**
-     * Set stub path.
-     *
-     * @param string $stubPath
-     *
-     * @return $this
-     */
-    public function setStubPath($stubPath)
-    {
-        $this->stubPath = $stubPath;
-
-        return $this;
     }
 }
