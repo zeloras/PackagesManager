@@ -4,15 +4,9 @@ namespace GeekCms\PackagesManager\Events;
 
 use App\Events\Event;
 use App\Models\User;
-use Carbon\Carbon;
-use DB;
 use Gcms;
 use GeekCms\PackagesManager\Models\Modules;
-use Illuminate\Support\Facades\Schema;
-use Packages;
-use Spatie\Permission\Models\Permission;
 use Throwable;
-use function count;
 
 /**
  * Class ModulesEvent.

@@ -3,11 +3,13 @@
 namespace GeekCms\PackagesManager\Modules;
 
 use Illuminate\Container\Container;
-use GeekCms\PackagesManager\Support\ServiceProvider as MainServiceProvider;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
+use Illuminate\Support\ServiceProvider as MainServiceAbstract;
 
-abstract class ModuleAbstract extends MainServiceProvider
+
+
+abstract class ModuleAbstract extends MainServiceAbstract
 {
     use Macroable;
 
