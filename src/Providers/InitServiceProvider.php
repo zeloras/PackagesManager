@@ -34,6 +34,9 @@ class InitServiceProvider extends MainServiceProvider
     }
     /**
      * Register the service provider.
+     *
+     * @param string|null $name
+     * @return mixed|void
      */
     public function register(string $name = null)
     {
@@ -50,11 +53,10 @@ class InitServiceProvider extends MainServiceProvider
      */
     protected function registerServices()
     {
-        $this->app->singleton(RepositoryInterface::class, function ($app) {
-            $path = $app['config']->get('modules.paths.modules');
-            return new MainRepository($app, $path);
+        $this->app->singleton(RepositoryInterface::class, static function ($app) {
+            return new MainRepository($app, config('modules.paths.modules'));
         });
-        $this->app->alias(RepositoryInterface::class, 'modules');
+        $this->app->alias(RepositoryInterface::class, config('modules.registration_name', 'modules'));
         //$this->registerFacades();
     }
 
@@ -63,9 +65,10 @@ class InitServiceProvider extends MainServiceProvider
      */
     public function registerNavigation(): void
     {
-        Menu::create('admin.sidenav', function ($menu) {
+        $self = $this;
+        Menu::create('admin.sidenav', static function ($menu) use ($self) {
             $menu->setPresenter(AdminSidenav::class);
-            $menu->route('admin', $this->getPrefix() . $this->getName() . '::admin/sidenav.Dashboard', [], null, [
+            $menu->route('admin', $self->getPrefix() . $self->getName() . '::admin/sidenav.Dashboard', [], null, [
                 'icon' => 'font-icon font-icon-dashboard',
             ]);
         });
@@ -78,6 +81,6 @@ class InitServiceProvider extends MainServiceProvider
      */
     public function provides()
     {
-        return [RepositoryInterface::class, 'modules'];
+        return [RepositoryInterface::class, config('modules.registration_name', 'modules')];
     }
 }

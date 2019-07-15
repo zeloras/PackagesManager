@@ -64,7 +64,7 @@ class LocalPackage
             $weight = $sort_desc ? 1 : -1;
             if ($a['installed'] && $b['installed']) {
                 $weight = $a['enabled'] ? 1 : -1;
-            } elseif ($a['installed'] || $b['installed']) {
+            } elseif (!$a['installed'] || !$b['installed']) {
                 $weight = 1;
             }
 

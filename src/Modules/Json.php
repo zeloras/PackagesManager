@@ -29,10 +29,10 @@ class Json
     protected $attributes;
 
     /**
-     * The constructor.
-     *
-     * @param mixed                             $path
-     * @param \Illuminate\Filesystem\Filesystem $filesystem
+     * Json constructor.
+     * @param $path
+     * @param Filesystem|null $filesystem
+     * @throws \Exception
      */
     public function __construct($path, Filesystem $filesystem = null)
     {
@@ -92,10 +92,10 @@ class Json
     /**
      * Make new instance.
      *
-     * @param string                            $path
-     * @param \Illuminate\Filesystem\Filesystem $filesystem
-     *
-     * @return static
+     * @param $path
+     * @param Filesystem|null $filesystem
+     * @return Json
+     * @throws \Exception
      */
     public static function make($path, Filesystem $filesystem = null)
     {
@@ -106,6 +106,7 @@ class Json
      * Get file content.
      *
      * @return string
+     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
      */
     public function getContents()
     {
@@ -130,7 +131,7 @@ class Json
             return $attributes;
         }
 
-        return app('cache')->remember($this->getPath(), config('modules.cache.lifetime'), function () use ($attributes) {
+        return app('cache')->remember($this->getPath(), config('modules.cache.lifetime'), static function () use ($attributes) {
             return $attributes;
         });
     }
@@ -232,6 +233,7 @@ class Json
      * Handle call to __toString method.
      *
      * @return string
+     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
      */
     public function __toString()
     {

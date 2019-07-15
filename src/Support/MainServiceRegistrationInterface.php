@@ -29,11 +29,6 @@ interface MainServiceRegistrationInterface
     public const LOGS_CHANNEL = 'modules';
 
     /**
-     * Path for load config.
-     */
-    public const CONFIG_PATH = 'src/Config/config.php';
-
-    /**
      * MainServiceInterface constructor.
      * @param Container $app
      * @param null $name

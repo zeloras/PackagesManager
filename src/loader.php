@@ -1,6 +1,6 @@
 <?php
 
-if (!function_exists('giveMeTheModuleName')) {
+if (!function_exists('module_package_name')) {
     /**
      * Retur admin prefx with uri string.
      *
@@ -9,7 +9,7 @@ if (!function_exists('giveMeTheModuleName')) {
      *
      * @return null|string
      */
-    function giveMeTheModuleName($class, $default = null)
+    function module_package_name($class, $default = null)
     {
         preg_match_all('/([^\\\]+\\\){1}(?<module>.*?)\\\/ims', $class, $module_names);
 
@@ -20,7 +20,7 @@ if (!function_exists('giveMeTheModuleName')) {
 if (! function_exists('module_path')) {
     function module_path($name)
     {
-        $module = app('modules')->find($name);
+        $module = app(config('modules.registration_name', 'modules'))->find($name);
         return $module->getPath();
     }
 }

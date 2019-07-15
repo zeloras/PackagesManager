@@ -8,7 +8,6 @@ use Illuminate\Support\Traits\Macroable;
 use Illuminate\Support\ServiceProvider as MainServiceAbstract;
 
 
-
 abstract class ModuleAbstract extends MainServiceAbstract
 {
     use Macroable;
@@ -146,17 +145,16 @@ abstract class ModuleAbstract extends MainServiceAbstract
     /**
      * Get json contents from the cache, setting as needed.
      *
-     * @param string $file
-     *
+     * @param null $file
      * @return Json
      */
     public function json($file = null) : Json
     {
         $path = $this->getPath();
         if (empty($file)) {
-            $file = 'module.json';
+            $file = config('modules.paths.main_module_bundle');
             $file_module = $this->getLowerName() . '_' . $file;
-            $path_storage = storage_path(\Gcms::MODULES_STORAGE_DIR);
+            $path_storage = config('modules.paths.modules_storage');
             $full_path = $path_storage . DIRECTORY_SEPARATOR . $file_module;
             if (!file_exists($full_path) || !is_file($full_path)) {
                 copy($path . DIRECTORY_SEPARATOR . $file, $full_path);

@@ -187,35 +187,20 @@ class Installer
      */
     public function getRepoUrl()
     {
-        switch ($this->type) {
-            case 'github':
-                return "git@github.com:{$this->name}.git";
+        $main_config = array_get(
+            config('modules.repositories', []),
+            $this->type,
+            config('modules.repositories.default', [])
+        );
 
-            case 'github-https':
-                return "https://github.com/{$this->name}.git";
-
-            case 'gitlab':
-                return "git@gitlab.com:{$this->name}.git";
-                break;
-
-            case 'bitbucket':
-                return "git@bitbucket.org:{$this->name}.git";
-
-            default:
-
-                // Check of type 'scheme://host/path'
-                if (filter_var($this->type, FILTER_VALIDATE_URL)) {
-                    return $this->type;
-                }
-
-                // Check of type 'user@host'
-                if (filter_var($this->type, FILTER_VALIDATE_EMAIL)) {
-                    return "{$this->type}:{$this->name}.git";
-                }
-
-                return;
-                break;
+        $link = $main_config['link'] . $this->name . $main_config['ext'];
+        if (empty($main_config['link'])) {
+            $link = filter_var($this->type, FILTER_VALIDATE_URL)
+                ? $this->type
+                : $this->type . ':' . $this->name . $main_config['ext'];
         }
+
+        return $link;
     }
 
     /**
@@ -225,7 +210,7 @@ class Installer
      */
     public function getBranch()
     {
-        return is_null($this->version) ? 'master' : $this->version;
+        return $this->version ?? config('modules.default_branch');
     }
 
     /**
@@ -235,7 +220,7 @@ class Installer
      */
     public function getModuleName()
     {
-        $parts = explode('/', $this->name);
+        $parts = explode(DIRECTORY_SEPARATOR, $this->name);
 
         return Str::studly(end($parts));
     }
@@ -247,11 +232,9 @@ class Installer
      */
     public function getPackageName()
     {
-        if (is_null($this->version)) {
-            return $this->name . ':dev-master';
-        }
-
-        return $this->name . ':' . $this->version;
+        return ($this->version === null)
+            ? $this->name . ':' . config('modules.default_package_branch')
+            : $this->name . ':' . $this->version;
     }
 
     /**

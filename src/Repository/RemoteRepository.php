@@ -30,8 +30,8 @@ class RemoteRepository extends MainRepositoryAbstract
      */
     protected function getRepositories()
     {
-        $module = $this->findOrFail(giveMeTheModuleName(static::class));
-        if (!empty($module)) {
+        $module = $this->findOrFail(module_package_name(static::class));
+        if ($module !== null) {
             $authors = $this->getDevelopers($module);
             $this->modules[self::PACKAGE_OFFICIAL] = $this->getMainModules($authors, $module);
         }
@@ -114,12 +114,13 @@ class RemoteRepository extends MainRepositoryAbstract
      *
      * @param string $url
      * @return array
+     * @throws ModuleNotFoundException
      */
     protected function getLocalData($url = '')
     {
         $main_list = [];
         $main_info = pathinfo(__DIR__);
-        $list = file_get_contents($main_info['dirname'] . DIRECTORY_SEPARATOR . 'repo.json');
+        $list = file_get_contents($main_info['dirname'] . DIRECTORY_SEPARATOR . config('modules.paths.repositories'));
         $list = json_decode($list, true);
 
         if ($list && count($list)) {
@@ -127,8 +128,8 @@ class RemoteRepository extends MainRepositoryAbstract
             foreach ($main_list as $module => $value) {
                 $find_module = $this->findOrFail($module);
                 $find_module = $find_module->getPath() . DIRECTORY_SEPARATOR;
-                $find_composer = file_get_contents($find_module . 'composer.json');
-                $find_init = file_get_contents($find_module . 'module.json');
+                $find_composer = file_get_contents($find_module . config('modules.paths.main_module_composer'));
+                $find_init = file_get_contents($find_module . config('modules.paths.main_module_bundle'));
 
                 $find_composer = json_decode($find_composer, true);
                 $find_init = json_decode($find_init, true);
@@ -150,7 +151,7 @@ class RemoteRepository extends MainRepositoryAbstract
      */
     protected function getGitData($url = '')
     {
-        return Cache::remember(self::CACHED_MODULES_LIST_KEY . '_' . $url, config(Gcms::MAIN_CACHE_TIMEOUT_KEY, 10), function () use ($url) {
+        return Cache::remember(self::CACHED_MODULES_LIST_KEY . '_' . $url, config(Gcms::MAIN_CACHE_TIMEOUT_KEY, 10), static function () use ($url) {
             try {
                 $headers = [
                     'Host: api.github.com',

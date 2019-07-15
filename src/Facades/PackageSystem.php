@@ -3,8 +3,6 @@
 namespace GeekCms\PackagesManager\Facades;
 
 use Config;
-use Gcms;
-use GeekCms\PackagesManager\Support\MainServiceProvider;
 use Illuminate\Support\Facades\Facade;
 use function is_array;
 use const DIRECTORY_SEPARATOR;
@@ -19,13 +17,13 @@ class PackageSystem extends Facade
     protected static function getFacadeAccessor()
     {
         $returned = null;
-        $module_name = giveMeTheModuleName(static::class, null);
-        $settings = Config::get(Gcms::MODULES_PREFIX . strtolower($module_name));
+        $module_name = module_package_name(static::class);
+        $settings = Config::get(config('modules.module_prefix') . strtolower($module_name));
 
         if (empty($settings)) {
-            $module_config = module_path($module_name) . DIRECTORY_SEPARATOR . MainServiceProvider::CONFIG_PATH;
-            if (file_exists($module_config) && is_file($module_config)) {
-                $settings = require $module_config;
+            $main_config = module_path($module_name) . DIRECTORY_SEPARATOR . config('modules.paths.main_config_path');
+            if (file_exists($main_config) && is_file($main_config)) {
+                $settings = require $main_config;
             }
         }
 

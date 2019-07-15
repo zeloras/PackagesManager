@@ -46,7 +46,8 @@ class AdminController extends Controller
      * Method for change module state
      *
      * @param null $module
-     * @return mixed
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Throwable
      */
     public function changeActive($module = null)
     {
@@ -69,7 +70,8 @@ class AdminController extends Controller
      * Method for change module state
      *
      * @param null $module
-     * @return mixed
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Throwable
      */
     public function changeInstall($module = null)
     {

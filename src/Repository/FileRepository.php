@@ -112,6 +112,7 @@ abstract class FileRepository implements RepositoryInterface, Countable
      * Get & scan all modules.
      *
      * @return array
+     * @throws \Exception
      */
     public function scan()
     {
@@ -119,7 +120,7 @@ abstract class FileRepository implements RepositoryInterface, Countable
         $modules = [];
 
         foreach ($paths as $key => $path) {
-            $manifests = $this->app['files']->glob("{$path}/module.json");
+            $manifests = $this->app['files']->glob($path . DIRECTORY_SEPARATOR . config('modules.paths.main_module_bundle'));
 
             is_array($manifests) || $manifests = [];
 
@@ -136,6 +137,7 @@ abstract class FileRepository implements RepositoryInterface, Countable
      * Get all modules.
      *
      * @return array
+     * @throws \Exception
      */
     public function all() : array
     {
@@ -173,8 +175,9 @@ abstract class FileRepository implements RepositoryInterface, Countable
      */
     public function getCached()
     {
-        return $this->app['cache']->remember($this->config('cache.key'), $this->config('cache.lifetime'), function () {
-            return $this->toCollection()->toArray();
+        $self = $this;
+        return $this->app['cache']->remember($this->config('cache.key'), $this->config('cache.lifetime'), static function () use ($self) {
+            return $self->toCollection()->toArray();
         });
     }
 
@@ -182,6 +185,7 @@ abstract class FileRepository implements RepositoryInterface, Countable
      * Get all modules as collection instance.
      *
      * @return Collection
+     * @throws \Exception
      */
     public function toCollection() : Collection
     {
@@ -191,9 +195,9 @@ abstract class FileRepository implements RepositoryInterface, Countable
     /**
      * Get modules by status.
      *
-     * @param $status
-     *
+     * @param int $status
      * @return array
+     * @throws \Exception
      */
     public function getByStatus($status) : array
     {
@@ -212,8 +216,8 @@ abstract class FileRepository implements RepositoryInterface, Countable
      * Determine whether the given module exist.
      *
      * @param $name
-     *
      * @return bool
+     * @throws \Exception
      */
     public function has($name) : bool
     {
@@ -224,6 +228,7 @@ abstract class FileRepository implements RepositoryInterface, Countable
      * Get list of enabled modules.
      *
      * @return array
+     * @throws \Exception
      */
     public function allEnabled() : array
     {
@@ -234,6 +239,7 @@ abstract class FileRepository implements RepositoryInterface, Countable
      * Get list of disabled modules.
      *
      * @return array
+     * @throws \Exception
      */
     public function allDisabled() : array
     {
@@ -244,6 +250,7 @@ abstract class FileRepository implements RepositoryInterface, Countable
      * Get count from all modules.
      *
      * @return int
+     * @throws \Exception
      */
     public function count() : int
     {
@@ -254,8 +261,8 @@ abstract class FileRepository implements RepositoryInterface, Countable
      * Get all ordered modules.
      *
      * @param string $direction
-     *
      * @return array
+     * @throws \Exception
      */
     public function getOrdered($direction = 'asc') : array
     {
@@ -308,8 +315,10 @@ abstract class FileRepository implements RepositoryInterface, Countable
 
     /**
      * Find a specific module.
+     *
      * @param $name
-     * @return mixed|void
+     * @return mixed
+     * @throws \Exception
      */
     public function find($name)
     {
@@ -322,8 +331,10 @@ abstract class FileRepository implements RepositoryInterface, Countable
 
     /**
      * Find a specific module by its alias.
+     *
      * @param $alias
-     * @return mixed|void
+     * @return mixed
+     * @throws \Exception
      */
     public function findByAlias($alias)
     {
@@ -377,9 +388,9 @@ abstract class FileRepository implements RepositoryInterface, Countable
     /**
      * Get all modules as laravel collection instance.
      *
-     * @param $status
-     *
+     * @param int $status
      * @return Collection
+     * @throws \Exception
      */
     public function collections($status = 1) : Collection
     {
@@ -434,12 +445,12 @@ abstract class FileRepository implements RepositoryInterface, Countable
      */
     public function getUsedStoragePath() : string
     {
-        $directory = storage_path('app/modules');
+        $directory = config('modules.paths.modules_storage_app');
         if ($this->app['files']->exists($directory) === false) {
             $this->app['files']->makeDirectory($directory, 0777, true);
         }
 
-        $path = storage_path('app/modules/modules.used');
+        $path = $directory . DIRECTORY_SEPARATOR . config('modules.paths.main_module_used');
         if (!$this->app['files']->exists($path)) {
             $this->app['files']->put($path, '');
         }

@@ -176,7 +176,7 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
     {
         if (!empty($name) && !empty($path)) {
             $this->setApp($app);
-            $this->setPrefix(Gcms::MODULES_PREFIX);
+            $this->setPrefix(config('modules.module_prefix'));
             $this->loadCoreComponents($name);
             $this->initVariables($this->getName(), $path);
         }
@@ -242,15 +242,15 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
         $this->setName(empty($main_name) ? $this->getName() : strtolower($main_name));
         $disk_name = $this::PATH_MODULES;
 
-        if (class_exists('PackageSystem')) {
+        if (class_exists(Gcms::MAIN_MODULE_ALIAS)) {
             $module_path = PackageSystem::getModulePath($this->getName());
-            $scaned_paths = array_map(static function ($val) use ($module_path, $preg_fnc) {
+            $scanned_paths = array_map(static function ($val) use ($module_path, $preg_fnc) {
                 $preg_path = $preg_fnc($val);
                 $preg_module = $preg_fnc(dirname($module_path, self::PARENT_LEVEL_DIR));
                 return ($preg_path === $preg_module) ? strtolower($preg_module) : null;
             }, PackageSystem::getScanPaths());
 
-            $real_path = array_filter($scaned_paths, static function ($value) {
+            $real_path = array_filter($scanned_paths, static function ($value) {
                 return !empty($value);
             });
 
@@ -312,11 +312,11 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
     public function __call($variable = null, $params = [])
     {
         $filter = preg_replace('/^get|^set/', '', $variable);
-        $filter_under = preg_replace_callback('/_([^_]+)/mu', function ($m) {
+        $filter_under = preg_replace_callback('/_([^_]+)/mu', static function ($m) {
             return ucfirst($m[1]);
         }, $filter);
 
-        $filter_upper = preg_replace_callback('/([A-Z]{1})/mu', function ($m) {
+        $filter_upper = preg_replace_callback('/([A-Z]{1})/mu', static function ($m) {
             return '_' . lcfirst($m[1]);
         }, $filter);
 
@@ -344,8 +344,9 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
      */
     public function registerConfig(): void
     {
-        $config_path = $this->getModulePath() . $this::CONFIG_PATH;
-        if ($this->is_exists($this::CONFIG_PATH, ['is_file' => true])) {
+        $config_path_src = config('modules.paths.main_config_path');
+        $config_path = $this->getModulePath() . $config_path_src;
+        if ($this->is_exists($config_path_src, ['is_file' => true])) {
             $this->publishes([
                 $config_path => config_path($this->getPrefix() . $this->getName() . '.php'),
             ], 'config');
@@ -703,11 +704,11 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
      */
     protected function registerNamespaces()
     {
-        $configPath = dirname(__DIR__, self::PARENT_LEVEL_DIR) . '/Config/modules.php';
+        $configPath = dirname(__DIR__, self::PARENT_LEVEL_DIR_2ND) . config('modules.paths.module_config_path');
         if (file_exists($configPath)) {
-            $this->mergeConfigFrom($configPath, 'modules');
+            $this->mergeConfigFrom($configPath, config('modules.registration_name', 'modules'));
             $this->publishes([
-                $configPath => config_path('modules.php'),
+                $configPath => config_path(config('modules.module_config')),
             ], 'config');
         }
     }
