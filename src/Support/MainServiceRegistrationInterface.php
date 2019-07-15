@@ -9,21 +9,6 @@ use Illuminate\Container\Container;
 interface MainServiceRegistrationInterface
 {
     /**
-     * This name using for get path to modules from config file.
-     */
-    public const PATH_MODULES = 'modules';
-
-    /**
-     * Path to main folder package
-     */
-    public const PATH_SRC = 'src/';
-
-    /**
-     * This name using for get path to root/resources from config file.
-     */
-    public const PATH_RESOURCES = 'resources';
-
-    /**
      * This name using for set log channel.
      */
     public const LOGS_CHANNEL = 'modules';

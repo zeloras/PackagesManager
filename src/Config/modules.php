@@ -4,9 +4,10 @@ return [
     'registration_name' => 'modules',
     'namespace' => 'Modules',
     'module_prefix' => 'module_',
+    'admin_route_prefix' => 'admin.',
     'module_config' => 'modules.php',
     'paths' => [
-        'modules' => base_path('Modules'),
+        'modules_dir' => base_path('Modules'),
         'modules_storage' => storage_path('Modules'),
         'modules_storage_app' => storage_path('app/modules'),
         'assets' => public_path('modules'),
@@ -17,6 +18,17 @@ return [
         'repositories' => 'repo.json',
         'main_config_path' => 'src/Config/config.php',
         'module_config_path' => 'src/Config/modules.php',
+
+        'modules' => 'modules',
+        'resources' => 'resources',
+        'main_lang' => 'src/lang/modules/',
+        'main_view' => 'src/views/modules/',
+        'module_routes' => 'src/Http/routes.php',
+        'module_lang' => 'src/Resources/lang',
+        'module_view' => 'src/Resources/views',
+        'module_factories' => 'src/Database/factories',
+        'module_migrations' => 'src/Database/Migrations',
+        'rules_map' => 'src/Models/Validators/Rules.php'
     ],
     'scan' => [
         'enabled' => true,

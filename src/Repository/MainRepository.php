@@ -5,7 +5,6 @@ namespace GeekCms\PackagesManager\Repository;
 use Gcms;
 use PackageSystem;
 use GeekCms\PackagesManager\Modules\Module;
-use GeekCms\PackagesManager\Support\MainServiceProvider;
 use Illuminate\Container\Container;
 use GeekCms\PackagesManager\Exceptions\ModuleNotFoundException;
 
@@ -28,7 +27,7 @@ class MainRepository extends MainRepositoryAbstract
     {
         // @todo fixit
         $this->app = $app;
-        $this->path = !empty($path) ? $path : base_path(ucfirst(MainServiceProvider::PATH_MODULES));
+        $this->path = !empty($path) ? $path : base_path(ucfirst(config('modules.paths.modules', 'modules')));
         $this->main_repo_app = new RemoteRepository($this->app, $this->path, $this);
         parent::__construct($app, $path);
     }
@@ -39,6 +38,7 @@ class MainRepository extends MainRepositoryAbstract
      * for register active modules.
      *
      * @return array
+     * @throws \Exception
      */
     public function listByPriority()
     {
@@ -129,6 +129,13 @@ class MainRepository extends MainRepositoryAbstract
         return $this->main_repo_app;
     }
 
+    /**
+     * Try find module by name and install
+     *
+     * @param $module
+     * @return bool
+     * @throws ModuleNotFoundException
+     */
     public function findAndInstall($module)
     {
         $installed = false;
@@ -189,6 +196,7 @@ class MainRepository extends MainRepositoryAbstract
      * Get list with permissions for every enabled module.
      *
      * @return array
+     * @throws \Exception
      */
     public function getPermissionsList()
     {

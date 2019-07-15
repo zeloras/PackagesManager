@@ -56,24 +56,6 @@ use const DIRECTORY_SEPARATOR;
 abstract class MainServiceAbstract extends ModuleAbstract implements MainServiceRegistrationInterface, MainServiceInterface
 {
     /**
-     * Config contain base paths for module components.
-     *
-     * @var array
-     */
-    public static $components_path = [
-        'modules' => self::PATH_MODULES,
-        'resources' => self::PATH_RESOURCES,
-        'main_lang' => self::PATH_SRC . 'lang/modules/',
-        'main_view' => self::PATH_SRC . 'views/modules/',
-        'module_routes' => self::PATH_SRC . 'Http/routes.php',
-        'module_lang' => self::PATH_SRC . 'Resources/lang',
-        'module_view' => self::PATH_SRC . 'Resources/views',
-        'module_factories' => self::PATH_SRC . 'Database/factories',
-        'module_migrations' => self::PATH_SRC . 'Database/Migrations',
-        'rules_map' => 'Models\\Validators\\Rules',
-    ];
-
-    /**
      * Base module name.
      *
      * @var null|string
@@ -107,13 +89,6 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
      * @var string
      */
     protected $prefix = '';
-
-    /**
-     * Prefix for admin routes.
-     *
-     * @var string
-     */
-    protected $admin_route_prefix = 'admin.';
 
     /**
      * Indicates if loading of the provider is deferred.
@@ -168,6 +143,8 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
      * @var Storage
      */
     protected $resources_storage_instance;
+
+    private $disk_modules;
 
     /**
      * @inheritDoc
@@ -240,7 +217,7 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
             return preg_replace('/' . preg_quote(base_path(), DIRECTORY_SEPARATOR) . '\\/|\\/\*$/uims', '', $value);
         };
         $this->setName(empty($main_name) ? $this->getName() : strtolower($main_name));
-        $disk_name = $this::PATH_MODULES;
+        $disk_name = config('modules.paths.modules');
 
         if (class_exists(Gcms::MAIN_MODULE_ALIAS)) {
             $module_path = PackageSystem::getModulePath($this->getName());
@@ -256,7 +233,7 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
 
             if (count($real_path)) {
                 $disk_name_first = array_first($real_path);
-                self::$components_path['modules'] = $disk_name_first;
+                $this->disk_modules = $disk_name_first ?? config('modules.paths.modules');
                 $disk_name = isset($this->app['config']["filesystems.disks.{$disk_name_first}"]) ? $disk_name_first : $disk_name;
             }
         }
@@ -372,7 +349,7 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
      * @param array ...$args
      *                        with key-value:
      *                        is_file bool false - Check $path is file
-     *                        instance string 'module' - Available check disks: self::PATH_RESOURCES, self::PATH_MODULES
+     *                        instance string 'module' - Available check disks: config('modules.paths.modules', 'resources'), config('modules.paths.modules')
      *                        create_dir bool true - If we check only directory, we can try to create folder in process
      *                        exception bool false - If file/dir not exists, show exception
      *                        exception_message string - Custom message for exception
@@ -400,8 +377,9 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
                 } elseif ('exception_message' === $key) {
                     $exception_message = (string)$value;
                 } elseif ('instance' === $key) {
-                    $instance = (self::PATH_RESOURCES === $value) ? $this->getResourcesStorageInstance() : $instance;
-                    $instance_init = (self::PATH_RESOURCES === $value);
+                    $resources = config('modules.paths.resources', 'resources');
+                    $instance = ($resources === $value) ? $this->getResourcesStorageInstance() : $instance;
+                    $instance_init = ($resources === $value);
                 }
             }
         }
@@ -488,9 +466,9 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
      */
     public function registerTranslations(): void
     {
-        $langModulePath = $this->getModulePath() . self::$components_path['module_lang'];
+        $langModulePath = $this->getModulePath() . config('modules.paths.module_lang');
 
-        if ($this->is_exists(self::$components_path['module_lang'])) {
+        if ($this->is_exists(config('modules.paths.module_lang'))) {
             $this->loadTranslationsFrom($langModulePath, $this->getPrefix() . $this->getName());
         }
     }
@@ -500,9 +478,9 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
      */
     public function registerRoutes(): void
     {
-        $path_routes = $this->getModulePath() . self::$components_path['module_routes'];
+        $path_routes = $this->getModulePath() . config('modules.paths.module_routes');
         if (!app()->routesAreCached()) {
-            if ($this->is_exists(self::$components_path['module_routes'], ['is_file' => true])) {
+            if ($this->is_exists(config('modules.paths.module_routes'), ['is_file' => true])) {
                 require_once $path_routes;
             }
         }
@@ -513,9 +491,9 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
      */
     public function registerFactories(): void
     {
-        $factory_path = $this->getModulePath() . self::$components_path['module_factories'];
+        $factory_path = $this->getModulePath() . config('modules.paths.module_factories');
 
-        if ($this->is_exists(self::$components_path['module_factories']) && !app()->environment('production')) {
+        if ($this->is_exists(config('modules.paths.module_factories')) && !app()->environment('production')) {
             app(Factory::class)->load($factory_path);
         }
     }
@@ -525,8 +503,8 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
      */
     public function registerMigrations(): void
     {
-        $migration_path = $this->getModulePath() . self::$components_path['module_migrations'];
-        if ($this->is_exists(self::$components_path['module_migrations'])) {
+        $migration_path = $this->getModulePath() . config('modules.paths.module_migrations');
+        if ($this->is_exists(config('modules.paths.module_migrations'))) {
             $this->loadMigrationsFrom($migration_path);
         }
     }
@@ -541,16 +519,17 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
      */
     public function registerViews(): void
     {
-        $view_path_main = resource_path(self::$components_path['main_view'] . $this->getName());
-        $view_path_module = $this->getModulePath() . self::$components_path['module_view'];
+        $view_path_main = resource_path(config('modules.paths.main_view') . $this->getName());
+        $view_path_module = $this->getModulePath() . config('modules.paths.module_view');
 
-        if ($this->is_exists(self::$components_path['module_view'])) {
+        if ($this->is_exists(config('modules.paths.module_view'))) {
             $this->publishes([
                 $view_path_module => $view_path_main,
             ], 'views');
 
-            $this->loadViewsFrom(array_merge(array_map(function ($path) {
-                return $path . self::$components_path['modules'] . DIRECTORY_SEPARATOR . $this->getName();
+            $disk_modules = $this->disk_modules ?? config('modules.paths.modules');
+            $this->loadViewsFrom(array_merge(array_map(function ($path) use ($disk_modules) {
+                return $path . $disk_modules . DIRECTORY_SEPARATOR . $this->getName();
             }, Config::get('view.paths')), [$view_path_module]), $this->getName());
         }
     }
@@ -560,7 +539,9 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
      */
     public function registerValidationRules(): void
     {
-        $base_namespace = ucfirst(self::PATH_MODULES) . '\\' . $this->getNamespaceName() . '\\' . self::$components_path['rules_map'];
+
+        $base_filename = $this->getModulePath() . config('modules.paths.rules_map');
+        $base_namespace = namespace_use_file($base_filename);
         if (class_exists($base_namespace)) {
             Validator::resolver(static function ($translator, $data, $rules, $messages) use ($base_namespace) {
                 return new $base_namespace($translator, $data, $rules, $messages);
@@ -591,7 +572,7 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
                                     $icon = !empty($menu_child['icon']) ? $menu_child['icon'] : 'fa fa-fw fa-comments-o';
                                     $name = !empty($menu_child['i18n_name']) ? $menu_child['i18n_name'] : 'admin/sidenav.name';
 
-                                    $sub->route($this->getAdminRoutePrefix() . $route, $this->getNavname() . $name, null, [
+                                    $sub->route(config('modules.admin_route_prefix') . $route, $this->getNavname() . $name, null, [
                                         'icon' => $icon,
                                     ]);
                                 }
@@ -600,7 +581,7 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
                             ['icon' => $icon]
                         );
                     } elseif (!isset($menu_item['child']) || !count($menu_item['child'])) {
-                        $adminSidenav->route($this->getAdminRoutePrefix() . $route, $this->getNavname() . $name, null, [
+                        $adminSidenav->route(config('modules.admin_route_prefix') . $route, $this->getNavname() . $name, null, [
                             'icon' => $icon,
                         ]);
                     }
@@ -623,7 +604,7 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
         if (is_array($config) && isset($config['FacadeName']['alias'])) {
 
             try {
-                $path = base_path(ucfirst(self::PATH_MODULES));
+                $path = base_path(ucfirst(config('modules.paths.modules', 'modules')));
                 $aliasName = $config['FacadeName']['alias'];
                 $facadeClass = get_class(new $config['FacadeName']['facadePath']());
                 $repoClass = $config['FacadeName']['mainRepoPath'];

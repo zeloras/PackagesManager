@@ -64,9 +64,9 @@ class RemoteRepository extends MainRepositoryAbstract
      *
      * @param array $authors
      * @param null $module
-     *
      * @param bool $local
      * @return array
+     * @throws ModuleNotFoundException
      */
     protected function getMainModules($authors = [], $module = null, $local = true)
     {

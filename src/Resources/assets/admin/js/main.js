@@ -261,6 +261,7 @@ var adminMainComponent = {
         let config = self.config;
         let settings = config.template_clone_config;
         let arguments_list = (args.hasOwnProperty(0)) ? args[0] : {};
+
         let replaceFunc = function (template, arr, key) {
             let value = arr[key];
             let name = (/^_/.test(key)) ? '%' + key.replace(/^_/, '') + '%' : '\\%data\\.' + key + '\\%';
@@ -292,6 +293,8 @@ var adminMainComponent = {
         }
 
         if (settings.template && settings.insert) {
+            settings.data = (['array', 'object'].indexOf(typeof settings.data) === -1) ? JSON.parse(settings.data) : settings.data;
+
             if (settings.data && Array.isArray(settings.data)) {
                 let template_block = $(settings.template);
                 let template_in = settings.template_in_class || settings.template;

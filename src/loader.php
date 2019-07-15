@@ -50,3 +50,28 @@ if (! function_exists('public_path')) {
         return app()->make('path.public') . ($path ? DIRECTORY_SEPARATOR . ltrim($path, DIRECTORY_SEPARATOR) : $path);
     }
 }
+
+if (! function_exists('namespace_use_file')) {
+    /**
+     * For get full namespace by real filepath
+     *
+     * @param null $file
+     * @return string|null
+     */
+    function namespace_use_file($file = null)
+    {
+        if (file_exists($file) && is_file($file)) {
+            $get_conent = file_get_contents($file);
+            if ($get_conent) {
+                preg_match_all('#^namespace\s+(?<space>.+?);$|^class\s+(?<name>[^\s\W]+)\W*#smui', $get_conent, $results);
+                $get_conent = null;
+                unset($get_conent);
+                if (isset($results['space'][0], $results['name'][1])) {
+                    return $results['space'][0] . '\\' . $results['name'][1];
+                }
+            }
+        }
+
+        return null;
+    }
+}

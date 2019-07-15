@@ -54,7 +54,7 @@ class InitServiceProvider extends MainServiceProvider
     protected function registerServices()
     {
         $this->app->singleton(RepositoryInterface::class, static function ($app) {
-            return new MainRepository($app, config('modules.paths.modules'));
+            return new MainRepository($app, config('modules.paths.modules_dir'));
         });
         $this->app->alias(RepositoryInterface::class, config('modules.registration_name', 'modules'));
         //$this->registerFacades();
