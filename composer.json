@@ -4,8 +4,7 @@
   "keywords": [
     "geekcms",
     "geekcms-module",
-    "laravel",
-    "module"
+    "laravel"
   ],
   "license": "MIT",
   "require": {
