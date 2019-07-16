@@ -151,6 +151,10 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
      */
     public function __construct(Container $app, $name = null, $path = null)
     {
+        if (!\Gcms::checkDBConnection()) {
+            return;
+        }
+
         if (!empty($name) && !empty($path)) {
             $this->setApp($app);
             $this->setPrefix(config('modules.module_prefix'));
@@ -166,6 +170,10 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
      */
     public function boot()
     {
+        if (!\Gcms::checkDBConnection()) {
+            return;
+        }
+
         $this->loadCoreComponents();
         $this->initVariables($this->getName(), $this->getPath());
 
@@ -183,11 +191,16 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
         $this->registerViews();
         $this->registerValidationRules();
     }
+
     /**
      * {@inheritdoc}
      */
     public function register(string $main_name = null)
     {
+        if (!\Gcms::checkDBConnection()) {
+            return;
+        }
+
         $this->loadCoreComponents($main_name);
         $this->initVariables($this->getName(), $this->getPath());
 

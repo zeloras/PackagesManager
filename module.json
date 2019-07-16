@@ -13,9 +13,7 @@
     "files": [
         "src/loader.php"
     ],
-    "requires": [
-        "Nwidart\\Modules"
-    ],
+    "requires": [],
     "packages-authors": [
         "zeloras",
         "ponich",
