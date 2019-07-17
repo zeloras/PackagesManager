@@ -7,6 +7,7 @@ namespace GeekCms\PackagesManager\Support;
 use BadMethodCallException;
 use Config;
 use Gcms;
+use GeekCms\Menu\Libs\Admin\AdminSidenav;
 use GeekCms\PackagesManager\Providers\BootstrapServiceProvider;
 use Illuminate\Container\Container;
 use Illuminate\Database\Eloquent\Factory;
@@ -152,7 +153,7 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
     public function __construct(Container $app, $name = null, $path = null)
     {
         if (!\Gcms::checkDBConnection()) {
-            return;
+            return parent::__construct($app, $name, $path);
         }
 
         if (!empty($name) && !empty($path)) {
@@ -188,6 +189,7 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
         $this->registerFactories();
         $this->registerMigrations();
         $this->registerBladeDirective();
+        $this->registerNavigation();
         $this->registerViews();
         $this->registerValidationRules();
     }
@@ -209,7 +211,6 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
         $this->registerAliases();
         $this->registerProviders();
         $this->registerFacades();
-
         $this->registerTranslations();
         $this->registerRoutes();
         $this->registerFactories();
@@ -232,13 +233,15 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
         $this->setName(empty($main_name) ? $this->getName() : strtolower($main_name));
         $disk_name = config('modules.paths.modules');
 
+        // todo: too slow
         if (class_exists(Gcms::MAIN_MODULE_ALIAS)) {
             $module_path = PackageSystem::getModulePath($this->getName());
+            $path_list = PackageSystem::getScanPaths();
             $scanned_paths = array_map(static function ($val) use ($module_path, $preg_fnc) {
                 $preg_path = $preg_fnc($val);
                 $preg_module = $preg_fnc(dirname($module_path, self::PARENT_LEVEL_DIR));
                 return ($preg_path === $preg_module) ? strtolower($preg_module) : null;
-            }, PackageSystem::getScanPaths());
+            }, $path_list);
 
             $real_path = array_filter($scanned_paths, static function ($value) {
                 return !empty($value);
@@ -285,7 +288,7 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
             $this->setModulePath($this->getPath());
             $this->setNavname($this->getPrefix() . $this->getName() . '::');
         } catch (Exception $e) {
-            $this->getModuleLogs()->error($e);
+            //$this->getModuleLogs()->error($e);
             throw new Exception($e);
         }
     }
@@ -569,6 +572,15 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
     {
         $menu = $this->getMenu();
 
+        if (!Menu::instance('admin.sidenav')) {
+            Menu::create('admin.sidenav', static function ($menu) {
+                $menu->setPresenter(AdminSidenav::class);
+                $menu->route('admin', 'admin.Dashboard', [], null, [
+                    'icon' => 'font-icon font-icon-dashboard',
+                ]);
+            });
+        }
+
         if ($adminSidenav = Menu::instance('admin.sidenav')) {
             if ($menu && count($menu)) {
                 foreach ($menu as $menu_item) {
@@ -613,7 +625,7 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
          * Try load and set alias for "light" version, light version it's like a helper.
          */
         $config = $this->getModuleConfig();
-        $loader = AliasLoader::getInstance();
+
         if (is_array($config) && isset($config['FacadeName']['alias'])) {
 
             try {
@@ -624,23 +636,22 @@ abstract class MainServiceAbstract extends ModuleAbstract implements MainService
 
                 if (!class_exists($aliasName)) {
                     if (method_exists($repoClass, 'getInstance')) {
-                        $this->app->bind($aliasName, static function ($app) use ($repoClass) {
-                            return (new $repoClass())::getInstance();
-                        });
 
-                        $this->app->instance(get_class(new $repoClass()), $repoClass::getInstance());
-                        $loader->alias($facadeClass, $aliasName);
-                        class_alias($facadeClass, $aliasName);
+                        $this->app->singleton($aliasName, function ($app) use ($repoClass) {
+                            return $repoClass::getInstance();
+                        });
+                        //$this->app->instance(get_class(new $repoClass()), $repoClass::getInstance());
+                        //$this->app->alias($aliasName, $facadeClass);
+                        // todo: check wtf
+                        AliasLoader::getInstance([$aliasName => $facadeClass])->register();
+                        //class_alias($facadeClass, $aliasName);
                     } else {
-                        $this->app->bind($aliasName, static function ($app) use ($repoClass, $path) {
-                            return new $repoClass($app, $path);
-                        });
-
                         $this->app->singleton($aliasName, static function ($app) use ($repoClass, $path) {
                             return new $repoClass($app, $path);
                         });
-                        $loader->alias($facadeClass, $aliasName);
-                        class_alias($facadeClass, $aliasName);
+                        AliasLoader::getInstance([$aliasName => $facadeClass])->register();
+                        //$loader->alias($facadeClass, $aliasName);
+                        //class_alias($facadeClass, $aliasName);
                     }
                 }
             } catch (Exception $e) {

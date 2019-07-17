@@ -20,8 +20,9 @@ if (!function_exists('module_package_name')) {
 if (! function_exists('module_path')) {
     function module_path($name)
     {
-        $module = app(config('modules.registration_name', 'modules'))->find($name);
-        return $module->getPath();
+        $app = app(config('modules.registration_name', 'modules'));
+        $module = ($app) ?  $app->find($name)->getPath() : false;
+        return $module;
     }
 }
 
