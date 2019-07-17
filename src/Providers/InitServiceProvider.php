@@ -61,22 +61,6 @@ class InitServiceProvider extends MainServiceProvider
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function registerNavigation(): void
-    {
-        $self = $this;
-        Menu::create('admin.sidenav', static function ($menu) use ($self) {
-            $menu->setPresenter(AdminSidenav::class);
-            $menu->route('admin', $self->getPrefix() . $self->getName() . '::admin/sidenav.Dashboard', [], null, [
-                'icon' => 'font-icon font-icon-dashboard',
-            ]);
-        });
-
-        parent::registerNavigation();
-    }
-
-    /**
      * @inheritDoc
      */
     public function provides()

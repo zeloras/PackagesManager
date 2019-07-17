@@ -11,7 +11,10 @@ class BootstrapServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $this->app[config('modules.registration_name', 'modules')]->boot();
+        $app = $this->app[config('modules.registration_name', 'modules')];
+        if ($app) {
+            $app->boot();
+        }
     }
 
     /**
@@ -19,6 +22,9 @@ class BootstrapServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app[config('modules.registration_name', 'modules')]->register();
+        $app = $this->app[config('modules.registration_name', 'modules')];
+        if ($app) {
+            $app->register();
+        }
     }
 }

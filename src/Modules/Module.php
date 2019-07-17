@@ -12,6 +12,7 @@ class Module extends ModuleAbstract
     public function registerInit()
     {
         $provider_called = null;
+
         $providers = $this->get('providers', []);
         foreach ($providers as $provider) {
             $main_provider = $provider::mainInit([$this->getLaravel(), $this->getName(), $this->getPath()]);
